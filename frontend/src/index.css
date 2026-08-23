@@ -12,11 +12,12 @@
   /* internal compile-time constants — do not modify */
   --__rev-c: "4443432d4357494352";
   --__lc-rev: 0x4f452d3236;
-  /* Brand */
-  --oe-blue: #0071e3;
-  --oe-blue-hover: #0077ed;
-  --oe-blue-active: #006edb;
-  --oe-blue-dark: #005bb5;
+  /* Brand — Sod Boys Ltd green, matching the v1 fieldops-system palette
+     (--color-accent family) so the two systems read as one brand. */
+  --oe-blue: #2e8b3f;
+  --oe-blue-hover: #35a049;
+  --oe-blue-active: #256e33;
+  --oe-blue-dark: #1f6b2d;
   /* Theme-aware blue intended for use as TEXT on tinted/lifted surfaces.
      Pairs with --oe-blue-subtle and the semantic-info pills.
      WCAG-AA contrast fix 2026-05-27 (sequel to v5.3.0): the v5.3.0 wave
@@ -28,13 +29,13 @@
        Light  #005bb5 → 7.4:1 on #fff, 7.0:1 on #f0f7ff
        Dark   #93c5fd → 7.9:1 on #1e2130, 8.4:1 on #1a1d2b, 7.8:1 on
                         flattened bg-oe-blue-subtle (rgba 0.15 over bg) */
-  --oe-blue-text: #005bb5;
+  --oe-blue-text: #1f6b2d;
   /* WCAG-AA contrast fix 2026-05-27: was #e8f2fe (4.15:1 against
      text-oe-blue #0071e3 — fails AA for normal text). Lightened to
      #f0f7ff so the Apple-Blue brand colour passes AA on the pill
      backgrounds used app-wide (badges, BETA chips, status tags).
      before: #e8f2fe → 4.15:1   after: #f0f7ff → 4.70:1 (axe contrast-AA) */
-  --oe-blue-subtle: #f0f7ff;
+  --oe-blue-subtle: #eef7f0;
   /* Channel triplets for Tailwind alpha modifiers (bg-oe-blue/10,
      border-oe-blue/30, hover:bg-surface-secondary/50, ...). Tailwind
      cannot inject alpha into an opaque var(), so before these existed
@@ -42,7 +43,7 @@
      the build - the class rendered nothing (found 2026-06-06, reported
      as "info blocks have no background"). MUST stay in sync with the
      hex values above/below. */
-  --oe-blue-ch: 0 113 227;
+  --oe-blue-ch: 46 139 63;
 
   /* Purple — the status palette ran out of hues before it ran out of states.
      Seven invoice states share five badge variants, and the pair that had to
@@ -56,11 +57,13 @@
      Note that hue is a weak channel on its own: purple sits next to blue for
      a red-blind reader, so the badge label stays the thing that carries the
      meaning and this is the second cue, not the only one. */
-  --oe-purple: #9333ea;
-  --oe-purple-subtle: #faf5ff;
-  --oe-purple-text: #6b21a8;
+  /* Secondary brand accent — the gold/sun tone from the Sod Boys logo
+     (--color-accent-2 in v1). */
+  --oe-purple: #f2a71b;
+  --oe-purple-subtle: #fdf3df;
+  --oe-purple-text: #92400e;
   /* Channel triplet for alpha modifiers - see the blue comment above. */
-  --oe-purple-ch: 147 51 234;
+  --oe-purple-ch: 242 167 27;
 
   /* Surfaces */
   --oe-bg: #ffffff;
@@ -215,28 +218,25 @@
      `--oe-blue-dark` is the solid button hover/active background.
      White button text needs a saturated blue here, not a tint;
      theme-aware text uses `--oe-blue-text` instead. */
-  --oe-blue: #3b82f6;
-  --oe-blue-hover: #60a5fa;
-  --oe-blue-active: #2563eb;
-  --oe-blue-dark: #1e40af;
-  --oe-blue-subtle: rgba(59, 130, 246, 0.15);
-  /* See light-mode comment. Dark-mode swaps to Tailwind blue-300 so
+  --oe-blue: #22c55e;
+  --oe-blue-hover: #4ade80;
+  --oe-blue-active: #16a34a;
+  --oe-blue-dark: #15803d;
+  --oe-blue-subtle: rgba(34, 197, 94, 0.15);
+  /* See light-mode comment. Dark-mode swaps to a bright green so
      `text-oe-blue-text` reads cleanly on lifted dark surfaces without
      touching `bg-oe-blue-dark` (used as hover/active button bg). */
-  --oe-blue-text: #93c5fd;
+  --oe-blue-text: #86efac;
   /* Channel triplet - see the light-mode comment. Keep in sync. */
-  --oe-blue-ch: 59 130 246;
+  --oe-blue-ch: 34 197 94;
 
-  /* Purple — see the light-mode comment for why this family exists. Same
-     shape as the blue pair: the tint becomes a translucent wash so it lifts
-     with whatever surface it sits on, and the text goes brighter so one class
-     clears AA in both themes. Worst case is the elevated surface:
-       Dark   #d8b4fe -> 9.03:1 on #1e2130, 7.58:1 on the flattened pill */
-  --oe-purple: #a855f7;
-  --oe-purple-subtle: rgba(168, 85, 247, 0.15);
-  --oe-purple-text: #d8b4fe;
+  /* Secondary brand accent — see the light-mode comment. Same shape as the
+     green pair: translucent wash for the tint, brighter text for AA. */
+  --oe-purple: #f59e0b;
+  --oe-purple-subtle: rgba(245, 158, 11, 0.15);
+  --oe-purple-text: #fcd34d;
   /* Channel triplet - see the light-mode comment. Keep in sync. */
-  --oe-purple-ch: 168 85 247;
+  --oe-purple-ch: 245 158 11;
 
   /* Surfaces — deep blue-gray palette */
   --oe-bg: #0f1117;

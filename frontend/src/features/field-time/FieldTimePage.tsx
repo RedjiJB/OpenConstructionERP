@@ -10,7 +10,6 @@
 
 import { Fragment, useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Plus,
@@ -64,14 +63,6 @@ const STATUS_BADGE: Record<TimesheetStatus, BadgeVariant> = {
 };
 
 const STATUS_ORDER: TimesheetStatus[] = ['draft', 'submitted', 'approved', 'reversed'];
-
-function ModLink({ to, children }: { to: string; children: ReactNode }) {
-  return (
-    <Link to={to} className="font-medium text-oe-blue-text hover:underline">
-      {children}
-    </Link>
-  );
-}
 
 /**
  * One-glance explainer: what Field Time is for and how it connects.
@@ -158,18 +149,6 @@ function HowFieldTimeWorks() {
         ))}
       </ol>
 
-      <div className="mt-3 flex flex-col gap-1.5 border-t border-border-light pt-3 text-2xs text-content-tertiary sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-1">
-        <span>
-          <span className="font-medium text-content-secondary">
-            {t('field_time.flow_connects', { defaultValue: 'Connects with:' })}
-          </span>{' '}
-          <ModLink to="/variations">
-            {t('field_time.mod_variations', { defaultValue: 'Variations' })}
-          </ModLink>{' '}
-          · <ModLink to="/costs">{t('field_time.mod_cost', { defaultValue: 'Cost control' })}</ModLink>{' '}
-          · <ModLink to="/field">{t('field_time.mod_field', { defaultValue: 'Field app' })}</ModLink>
-        </span>
-      </div>
     </CollapsibleSection>
   );
 }

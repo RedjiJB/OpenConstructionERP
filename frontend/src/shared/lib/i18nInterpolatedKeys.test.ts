@@ -145,19 +145,27 @@ const declaredCodes = [
 describe('#200 counted keys carry every plural form their own language uses', () => {
   it('reads every locale file the app declares', () => {
     // A glob that quietly matches nothing would make every assertion below pass,
-    // so the count has to be asserted - but against the registry rather than
+    // so the count has to be asserted - but against the file system rather than
     // against a number typed here. A literal goes stale the day a locale is
     // added: this read 29 while the app shipped 37, and the eight new files
     // were being checked by every assertion below while this one line called
     // them absent.
-    expect(declaredCodes.length).toBeGreaterThan(25);
-    // Mongolian is on disk but deliberately not in SUPPORTED_LANGUAGES: five
-    // invented roots passed every gate, so the language is withheld until the
-    // file is retranslated. The file stays covered by every assertion below;
-    // only the registry comparison must expect its absence.
-    const undeclaredOnPurpose = ['mn'];
-    expect([...localeFiles.map(([code]) => code)].filter((code) => !undeclaredOnPurpose.includes(code)).sort())
-      .toEqual([...declaredCodes].sort());
+    //
+    // D-Central FieldOps fork (Task #156): SUPPORTED_LANGUAGES was trimmed to
+    // just en/fr (src/app/i18n.ts) while every locale FILE stays on disk, so
+    // the two collections below are no longer expected to be equal -- every
+    // assertion further down in this file still runs against all of
+    // `localeFiles`, which the trim never touched. This canary moved from
+    // `declaredCodes.length` (now permanently 2) to `localeFiles.length` (the
+    // quantity that would actually go quiet if the glob broke).
+    expect(localeFiles.length).toBeGreaterThan(25);
+    // Every declared code must have a real file backing it; the reverse
+    // (a file with no declared code) is expected and normal in this fork --
+    // see the comment beside SUPPORTED_LANGUAGES for why the files stay.
+    const fileCodes = new Set(localeFiles.map(([code]) => code));
+    for (const code of declaredCodes) {
+      expect(fileCodes.has(code), `declared language '${code}' has no locale file on disk`).toBe(true);
+    }
   });
 
   it('gets the plural categories it expects out of this runtime', () => {

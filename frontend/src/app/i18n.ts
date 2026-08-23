@@ -4,79 +4,17 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import { useTranslation as useI18nTranslation } from 'react-i18next';
 
+// D-Central FieldOps fork (Task #156): trimmed from ~40 offered locales
+// to the two Sod Boys Ltd's crew actually needs. Both carry `country:
+// 'ca'` so the switcher shows the Canadian flag next to each -- not the
+// UK flag for English or the France flag for French, since this is a
+// Canadian company's own tool, not an internationalised product with a
+// language-to-home-country default. The dropped locale files stay on
+// disk (nothing deletes them); re-adding a language later is a one-line
+// change here.
 export const SUPPORTED_LANGUAGES = [
-  { code: 'en', name: 'English', flag: '🇬🇧', country: 'gb' },
-  // American English is a regional variant of the entry above, in the same sense
-  // es-MX is one of es: the file under `locales/en-US.ts` holds only the words
-  // American practice names differently, and every other key is answered by
-  // `en.ts` through the fallback chain. The region subtag is upper case because
-  // that is how i18next normalises a two-part code, and the bundle has to be
-  // registered under the same spelling it looks up.
-  { code: 'en-US', name: 'English (US)', english: 'English (United States)', flag: '🇺🇸', country: 'us' },
-  { code: 'de', name: 'Deutsch', english: 'German', flag: '🇩🇪', country: 'de' },
-  { code: 'fr', name: 'Français', english: 'French', flag: '🇫🇷', country: 'fr' },
-  { code: 'es', name: 'Español', english: 'Spanish', flag: '🇪🇸', country: 'es' },
-  { code: 'es-MX', name: 'Español (México)', english: 'Spanish (Mexico)', flag: '🇲🇽', country: 'mx' },
-  { code: 'es-CL', name: 'Español (Chile)', english: 'Spanish (Chile)', flag: '🇨🇱', country: 'cl' },
-  { code: 'es-CO', name: 'Español (Colombia)', english: 'Spanish (Colombia)', flag: '🇨🇴', country: 'co' },
-  { code: 'pt', name: 'Português', english: 'Portuguese', flag: '🇵🇹', country: 'pt' },
-  { code: 'pt-BR', name: 'Português (Brasil)', english: 'Portuguese (Brazil)', flag: '🇧🇷', country: 'br' },
-  { code: 'ru', name: 'Русский', english: 'Russian', flag: '🇷🇺', country: 'ru' },
-  { code: 'zh', name: '简体中文', english: 'Chinese (Simplified)', flag: '🇨🇳', country: 'cn' },
-  { code: 'ar', name: 'العربية', english: 'Arabic', flag: '🇸🇦', country: 'sa', dir: 'rtl' },
-  { code: 'hi', name: 'हिन्दी', english: 'Hindi', flag: '🇮🇳', country: 'in' },
-  { code: 'tr', name: 'Türkçe', english: 'Turkish', flag: '🇹🇷', country: 'tr' },
-  { code: 'it', name: 'Italiano', english: 'Italian', flag: '🇮🇹', country: 'it' },
-  { code: 'nl', name: 'Nederlands', english: 'Dutch', flag: '🇳🇱', country: 'nl' },
-  { code: 'pl', name: 'Polski', english: 'Polish', flag: '🇵🇱', country: 'pl' },
-  { code: 'cs', name: 'Čeština', english: 'Czech', flag: '🇨🇿', country: 'cz' },
-  { code: 'ja', name: '日本語', english: 'Japanese', flag: '🇯🇵', country: 'jp' },
-  { code: 'ko', name: '한국어', english: 'Korean', flag: '🇰🇷', country: 'kr' },
-  { code: 'sv', name: 'Svenska', english: 'Swedish', flag: '🇸🇪', country: 'se' },
-  { code: 'no', name: 'Norsk', english: 'Norwegian', flag: '🇳🇴', country: 'no' },
-  { code: 'da', name: 'Dansk', english: 'Danish', flag: '🇩🇰', country: 'dk' },
-  { code: 'fi', name: 'Suomi', english: 'Finnish', flag: '🇫🇮', country: 'fi' },
-  { code: 'bg', name: 'Български', english: 'Bulgarian', flag: '🇧🇬', country: 'bg' },
-  { code: 'hr', name: 'Hrvatski', english: 'Croatian', flag: '🇭🇷', country: 'hr' },
-  { code: 'id', name: 'Bahasa Indonesia', english: 'Indonesian', flag: '🇮🇩', country: 'id' },
-  { code: 'ro', name: 'Română', english: 'Romanian', flag: '🇷🇴', country: 'ro' },
-  { code: 'th', name: 'ไทย', english: 'Thai', flag: '🇹🇭', country: 'th' },
-  { code: 'vi', name: 'Tiếng Việt', english: 'Vietnamese', flag: '🇻🇳', country: 'vn' },
-  // Mongolian is deliberately not offered: five invented roots passed every
-  // gate in mn.ts and the file needs a native-speaker pass before the
-  // language returns. The locale file stays on disk so the work resumes from
-  // where it stopped, but nothing loads it while it is off this list.
-  { code: 'ky', name: 'Кыргызча', english: 'Kyrgyz', flag: '🇰🇬', country: 'kg' },
-  { code: 'et', name: 'Eesti', english: 'Estonian', flag: '🇪🇪', country: 'ee' },
-  { code: 'bn', name: 'বাংলা', english: 'Bengali', flag: '🇧🇩', country: 'bd' },
-  { code: 'kk', name: 'Қазақша', english: 'Kazakh', flag: '🇰🇿', country: 'kz' },
-  { code: 'fil', name: 'Filipino', english: 'Filipino', flag: '🇵🇭', country: 'ph' },
-  { code: 'ur', name: 'اردو', english: 'Urdu', flag: '🇵🇰', country: 'pk', dir: 'rtl' },
-  { code: 'fa', name: 'فارسی', english: 'Persian', flag: '🇮🇷', country: 'ir', dir: 'rtl' },
-  { code: 'he', name: 'עברית', english: 'Hebrew', flag: '🇮🇱', country: 'il', dir: 'rtl' },
-  { code: 'el', name: 'Ελληνικά', english: 'Greek', flag: '🇬🇷', country: 'gr' },
-  // `uk` is the ISO 639-1 code for Ukrainian, and it is also the string this
-  // codebase already uses for the United Kingdom as a *region*: a BoQ preset
-  // region, a country-pack id, and the country map in CreateProjectPage all
-  // carry `uk` meaning Britain. The two live in different namespaces and must
-  // stay that way. Nothing may derive a UI language from a region code, or a
-  // British project would come up in Ukrainian.
-  { code: 'uk', name: 'Українська', english: 'Ukrainian', flag: '🇺🇦', country: 'ua' },
-  // Uzbek is written in Latin script: the Latin alphabet has been the official
-  // one since 1993 and is what public and construction documentation uses. The
-  // two modifier letters in the language's own name are U+02BB, not an
-  // apostrophe, and a straight quote there is a misspelling rather than a
-  // typographic preference.
-  //
-  // Uzbek is deliberately not offered yet. Measured on 2026-08-18, 16249 of
-  // the 34369 keys uz.ts shares with en.ts were still byte identical to the
-  // English, so about half the interface would reach a reader in English
-  // through silent fallback. Because the script is Latin, a glance cannot
-  // tell a translation from an untranslated string here, so that figure is a
-  // literal comparison rather than an inspection. The locale file stays on
-  // disk and the batch work continues; uncomment this line when it is done,
-  // and keep the U+02BB modifier letters when you do.
-  // { code: 'uz', name: 'Oʻzbekcha', english: 'Uzbek', flag: '🇺🇿', country: 'uz' },
+  { code: 'en', name: 'English', flag: '🇨🇦', country: 'ca' },
+  { code: 'fr', name: 'Français', english: 'French', flag: '🇨🇦', country: 'ca' },
 ];
 
 export function getLanguageByCode(code: string): (typeof SUPPORTED_LANGUAGES)[number] {

@@ -1,5 +1,12 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
+//
+// D-Central FieldOps fork (Task #156): re-skinned for Sod Boys Ltd — a
+// rising sun over rolling fields, matching the client's existing v1
+// (fieldops-system) logo and green/gold palette. Same animation
+// choreography as upstream's building-icon Logo, just re-pointed at
+// different shapes: background scales in, fields grow from the bottom,
+// the sun slides in, its rays fade in one by one.
 import clsx from 'clsx';
 
 interface LogoProps {
@@ -18,20 +25,19 @@ const sizeMap = {
 };
 
 /**
- * Brand logo — 3 ascending bars + building on gradient background.
- * Per BRAND.md: gradient #0066ff → #5856d6, white elements.
+ * Brand logo — rolling fields and a rising sun, on the Sod Boys green
+ * background.
  *
  * `animate` triggers a staggered entrance:
  *   1. Background scales in
- *   2. Bars grow up one by one
- *   3. Building slides in from right
- *   4. Windows fade in
+ *   2. Field bands grow up one by one
+ *   3. Sun slides in
+ *   4. Sun rays fade in
  */
 export function Logo({ size = 'md', animate = false, className }: LogoProps) {
   const isSmall = size === 'xs' || size === 'sm';
-  const gradientId = `oe-lg-${size}-${animate ? 'a' : 's'}`;
 
-  const barStyle = (delay: number, _height: number) =>
+  const fieldStyle = (delay: number) =>
     animate
       ? {
           transformOrigin: 'bottom',
@@ -40,14 +46,14 @@ export function Logo({ size = 'md', animate = false, className }: LogoProps) {
         }
       : undefined;
 
-  const buildingStyle = animate
+  const sunGroupStyle = animate
     ? {
         animation: `oeBuildingSlide 600ms cubic-bezier(0.22,1,0.36,1) both`,
         animationDelay: '300ms',
       }
     : undefined;
 
-  const windowStyle = (delay: number) =>
+  const rayStyle = (delay: number) =>
     animate
       ? {
           animation: `oeWindowFade 400ms ease both`,
@@ -68,37 +74,36 @@ export function Logo({ size = 'md', animate = false, className }: LogoProps) {
     >
       <svg viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
         <defs>
-          <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#0066ff" />
-            <stop offset="100%" stopColor="#5856d6" />
-          </linearGradient>
+          <clipPath id={`oe-lg-clip-${size}`}>
+            <rect x="32" y="32" width="448" height="448" rx="96" />
+          </clipPath>
         </defs>
 
         {/* Background */}
-        <rect x="32" y="32" width="448" height="448" rx="96" fill={`url(#${gradientId})`} style={bgStyle} />
+        <rect x="32" y="32" width="448" height="448" rx="96" fill="#eef7f0" style={bgStyle} />
 
-        {/* Bar 1 (short) */}
-        <rect x="102" y="296" width="42" height="114" rx="6" fill="#fff" opacity=".85" style={barStyle(120, 114)} />
-        {/* Bar 2 (medium) */}
-        <rect x="162" y="233" width="42" height="177" rx="6" fill="#fff" opacity=".95" style={barStyle(200, 177)} />
-        {/* Bar 3 (tall) */}
-        <rect x="222" y="176" width="42" height="234" rx="6" fill="#fff" opacity=".85" style={barStyle(280, 234)} />
-
-        {/* Building body */}
-        <rect x="282" y="150" width="128" height="260" rx="8" fill="#fff" opacity=".9" style={buildingStyle} />
-
-        {/* Windows + door — only shown at medium+ sizes */}
-        {!isSmall && (
-          <g style={buildingStyle}>
-            <rect x="304" y="182" width="26" height="28" rx="4" fill={`url(#${gradientId})`} opacity=".5" style={windowStyle(550)} />
-            <rect x="362" y="182" width="26" height="28" rx="4" fill={`url(#${gradientId})`} opacity=".5" style={windowStyle(600)} />
-            <rect x="304" y="226" width="26" height="28" rx="4" fill={`url(#${gradientId})`} opacity=".5" style={windowStyle(650)} />
-            <rect x="362" y="226" width="26" height="28" rx="4" fill={`url(#${gradientId})`} opacity=".5" style={windowStyle(700)} />
-            <rect x="304" y="272" width="26" height="28" rx="4" fill={`url(#${gradientId})`} opacity=".45" style={windowStyle(750)} />
-            <rect x="362" y="272" width="26" height="28" rx="4" fill={`url(#${gradientId})`} opacity=".45" style={windowStyle(800)} />
-            <rect x="329" y="328" width="34" height="82" rx="4" fill={`url(#${gradientId})`} opacity=".55" style={windowStyle(850)} />
+        <g clipPath={`url(#oe-lg-clip-${size})`}>
+          {/* Sun */}
+          <g style={sunGroupStyle}>
+            <circle cx="180" cy="188" r="58" fill="#f2a71b" />
+            {!isSmall && (
+              <g stroke="#f2a71b" strokeWidth="16" strokeLinecap="round">
+                <line x1="180" y1="70" x2="180" y2="102" style={rayStyle(550)} />
+                <line x1="180" y1="274" x2="180" y2="306" style={rayStyle(600)} />
+                <line x1="58" y1="188" x2="90" y2="188" style={rayStyle(650)} />
+                <line x1="270" y1="188" x2="302" y2="188" style={rayStyle(700)} />
+                <line x1="98" y1="106" x2="121" y2="129" style={rayStyle(750)} />
+                <line x1="239" y1="247" x2="262" y2="270" style={rayStyle(800)} />
+                <line x1="262" y1="106" x2="239" y2="129" style={rayStyle(850)} />
+              </g>
+            )}
           </g>
-        )}
+
+          {/* Rolling fields, back to front */}
+          <path d="M32 460 C 120 380, 200 420, 280 380 C 360 340, 420 400, 480 370 V 480 H 32 Z" fill="#256e33" style={fieldStyle(120)} />
+          <path d="M32 480 C 130 420, 220 460, 320 420 C 390 392, 440 430, 480 410 V 480 H 32 Z" fill="#35a049" style={fieldStyle(200)} />
+          <path d="M32 480 C 150 452, 260 480, 360 452 C 410 438, 450 456, 480 448 V 480 H 32 Z" fill="#2e8b3f" style={fieldStyle(280)} />
+        </g>
       </svg>
     </div>
   );
@@ -128,11 +133,9 @@ const gapSizeMap = {
 };
 
 /**
- * Logo + brand name. Per BRAND.md:
- * - Font: Plus Jakarta Sans 800
- * - Name: "OpenConstructionERP" (PascalCase, one word)
- * - Letter-spacing: -0.02em
- * - Icon is compact, name is prominent
+ * Logo + brand name: "Sod Boys" in the brand green, "FieldOps" as the
+ * quieter suffix — same visual weighting upstream used for its own
+ * "OpenConstruction"/"ERP" split.
  */
 export function LogoWithText({ size = 'md', animate, showVersion = true, className }: LogoWithTextProps) {
   return (
@@ -145,8 +148,8 @@ export function LogoWithText({ size = 'md', animate, showVersion = true, classNa
         )}
         style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.02em' }}
       >
-        Open<span className="text-oe-blue">Construction</span>
-        {showVersion && <span className="text-content-quaternary">ERP</span>}
+        <span className="text-oe-blue">Sod Boys</span>
+        {showVersion && <span className="text-content-quaternary"> FieldOps</span>}
       </span>
     </div>
   );

@@ -10,17 +10,14 @@ import {
   FolderOpen,
   Table2,
   CalendarDays,
-  Boxes,
   Settings,
   ChevronDown,
   ChevronRight,
-  Sparkles,
   X,
   ClipboardList,
   Users,
   HelpCircle,
   History,
-  Plus,
   Search,
   Pin,
   PinOff,
@@ -28,7 +25,6 @@ import {
   EyeOff,
   Pencil,
   Check,
-  Github,
   Loader2,
   type LucideIcon,
 } from 'lucide-react';
@@ -37,7 +33,6 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useModuleStore } from '@/stores/useModuleStore';
 import { apiGet } from '@/shared/lib/api';
 import { UpdateNotification } from '@/shared/ui/UpdateChecker';
-import { ArticleNewsCard } from '@/shared/ui/ArticleNewsCard';
 import { useViewModeStore } from '@/stores/useViewModeStore';
 import { useNavPendingStore } from '@/shared/lib/navigationProgress';
 import { useRecentStore } from '@/stores/useRecentStore';
@@ -53,7 +48,6 @@ import {
   SIDEBAR_WIDTH_FULL,
   SIDEBAR_WIDTH_ICON,
 } from '@/stores/useSidebarCollapseStore';
-import { RequestCustomModuleDialog } from '@/features/modules/RequestCustomModuleDialog';
 import {
   useActiveProjectProfile,
   buildModuleGate,
@@ -422,9 +416,6 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { isModuleEnabled } = useModuleStore();
-  // Subscribed separately so the module-count summary at the foot of the nav
-  // recomputes whenever a module is switched on or off.
-  const enabledModules = useModuleStore((s) => s.enabledModules);
   // Hidden whole-sections (nav groups) the user has switched off via the
   // "Edit menu". Persisted in useModuleStore alongside module state; here we
   // read the list and the bulk setter the Save action commits to.
@@ -614,59 +605,6 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editMode, visibleAdminGridItems, enterEditMode]);
 
-  // Module counter shown at the foot of the nav (before the "Add module"
-  // tile): how many module rows are visible in the menu right now versus how
-  // many the platform offers this user. "Total" counts every leaf menu row
-  // (static + dynamically registered module rows) the user is allowed to see
-  // (admin-only dev surfaces excluded for non-admins), regardless of whether
-  // it is currently switched on or hidden. "Shown" applies the same normal-mode
-  // visibility filter the nav render uses, so the pair updates live as modules
-  // are enabled/disabled or hidden/shown via Edit menu. It intentionally
-  // mirrors the predicate in the `navGroups.map` below; keep the two in step.
-  const moduleCounts = useMemo(() => {
-    let total = 0;
-    let shown = 0;
-    for (const group of navGroups) {
-      const groupHidden = hiddenGroups.includes(group.id);
-      const groupHiddenInSimple = Boolean(group.hideInSimple) && !isAdvanced;
-      const dynamicItems = getModuleNavItems(group.dynamicGroupKey ?? group.id).map((mi) => ({
-        to: mi.to,
-        moduleKey: mi.to.slice(1),
-        advancedOnly: mi.advancedOnly,
-        adminOnly: false,
-      }));
-      const staticItems = group.items.map((it) => ({
-        to: it.to,
-        moduleKey: it.moduleKey,
-        advancedOnly: it.advancedOnly,
-        adminOnly: it.adminOnly,
-      }));
-      for (const item of [...staticItems, ...dynamicItems]) {
-        // Admin-only rows are internal/dev surfaces, not product modules, so
-        // they do not count toward the platform total for a regular user.
-        if (item.adminOnly && userRole !== 'admin') continue;
-        total += 1;
-        const visible =
-          !groupHidden &&
-          !groupHiddenInSimple &&
-          (!item.moduleKey || isModuleEnabled(item.moduleKey)) &&
-          (!item.advancedOnly || isAdvanced) &&
-          !isRouteBackendDisabled(item.to) &&
-          !hiddenModules.includes(item.to);
-        if (visible) shown += 1;
-      }
-    }
-    return { total, shown };
-    // `enabledModules` is a dep so the count reacts to enable/disable; it feeds
-    // `isModuleEnabled` even though that function reference is stable.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isAdvanced, userRole, hiddenModules, hiddenGroups, enabledModules, isRouteBackendDisabled]);
-
-  // Custom-module request dialog — opens from the "Request a custom
-  // module" CTA at the bottom of the nav (below the "+ Add module"
-  // developer-guide tile). The dialog itself handles community vs
-  // bespoke routing.
-  const [customModuleOpen, setCustomModuleOpen] = useState(false);
 
   // Persist collapsed state to localStorage
   useEffect(() => {
@@ -1224,58 +1162,13 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             </button>
           </div>
         )}
-        {/* Module counter — a small live "{shown} of {total} modules" chip
-             right before the Add-module tile, so a user can see at a glance
-             how many modules are open in this menu and how many the platform
-             offers in total. Updates automatically as modules are enabled /
-             disabled or hidden / shown. Iconified mode shows a compact
-             "shown/total" so the number is never lost. */}
-        <div className={clsx('pt-2 pb-0.5', iconified ? 'px-1' : 'px-3')}>
-          <div
-            className={clsx(
-              'flex items-center justify-center rounded-lg bg-surface-secondary/40 text-content-secondary',
-              iconified ? 'px-1 py-1 gap-0.5' : 'gap-1.5 px-2.5 py-1.5',
-            )}
-            title={t('sidebar.module_count_title', {
-              defaultValue: '{{shown}} of {{total}} modules are shown in this menu',
-              shown: moduleCounts.shown,
-              total: moduleCounts.total,
-            })}
-          >
-            <Boxes
-              size={iconified ? 13 : 12}
-              strokeWidth={2}
-              className="shrink-0 text-content-tertiary"
-              aria-hidden
-            />
-            {iconified ? (
-              <span className="text-[9px] font-semibold tabular-nums leading-none text-content-secondary">
-                {moduleCounts.shown}/{moduleCounts.total}
-              </span>
-            ) : (
-              <span className="text-[11px] font-medium tabular-nums">
-                <span className="font-semibold text-content-primary">{moduleCounts.shown}</span>
-                <span className="text-content-tertiary"> / {moduleCounts.total} </span>
-                {t('sidebar.module_count_label', { defaultValue: 'modules' })}
-              </span>
-            )}
-            {/* Manage-modules shortcut — a small gear button immediately to the
-                 right of the "{shown} / {total} modules" count that jumps to the
-                 Modules settings page, where modules can be switched on / off.
-                 Hidden in iconified mode where horizontal room is tight. */}
-            {!iconified && (
-              <NavLink
-                to="/modules"
-                onClick={onClose}
-                title={t('sidebar.manage_modules', { defaultValue: 'Manage modules' })}
-                aria-label={t('sidebar.manage_modules', { defaultValue: 'Manage modules' })}
-                className="ml-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md text-content-tertiary hover:bg-surface-secondary hover:text-content-primary transition-colors"
-              >
-                <Settings size={12} strokeWidth={2} aria-hidden />
-              </NavLink>
-            )}
-          </div>
-        </div>
+        {/* D-Central FieldOps fork (Task #156): the module-count chip,
+             "Manage modules" shortcut (→ /modules), "Add module" tile
+             (→ /modules/developer-guide), and "Request a custom module"
+             dialog were all part of OpenConstructionERP's optional-module
+             marketplace, which this fork's route pruning removed
+             entirely (see App.tsx and src/modules/_registry.ts). All
+             three are dropped here rather than left as dead links. */}
         {/* Edit-menu shortcut — deliberately the same action as the "Edit menu"
              tile in the admin grid further down, repeated here directly under
              the module count. That grid sits below the entire nav list, so on a
@@ -1305,88 +1198,6 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
             </button>
           </div>
         )}
-        {/* Add-a-module CTA — dashed-border tile with a plus icon. Sits at
-             the very end of the main nav groups so it reads as "keep going,
-             there's more — build your own". Navigates into the in-app
-             developer guide rather than to the marketplace, which gives
-             contributors a clearer first step. When iconified, shrinks
-             to a centred icon-only square — the dashed border still
-             signals "add something". */}
-        <div className={clsx('pt-2 pb-1', iconified ? 'px-0 flex justify-center' : 'px-3')}>
-          <NavLink
-            to="/modules/developer-guide"
-            onClick={onClose}
-            title={iconified ? t('nav.add_module', { defaultValue: 'Add module' }) : undefined}
-            className={clsx(
-              'group flex items-center rounded-lg border border-dashed border-oe-blue/40 bg-gradient-to-br from-oe-blue/5 via-transparent to-blue-50/40 dark:from-oe-blue/10 dark:via-transparent dark:to-slate-900/30 hover:border-oe-blue hover:from-oe-blue/10 hover:shadow-sm transition-all',
-              iconified ? 'h-9 w-9 justify-center' : 'gap-2.5 px-2.5 py-2',
-            )}
-          >
-            <span className="shrink-0 flex h-7 w-7 items-center justify-center rounded-md bg-oe-blue/10 text-oe-blue group-hover:bg-oe-blue group-hover:text-white transition-colors">
-              <Plus size={14} strokeWidth={2.5} />
-            </span>
-            {!iconified && (
-              <span className="min-w-0 flex-1">
-                <span className="block text-xs font-semibold text-content-primary leading-tight">
-                  {t('nav.add_module', { defaultValue: 'Add module' })}
-                </span>
-                <span className="block text-[10px] text-content-tertiary leading-tight mt-0.5 truncate">
-                  {t('nav.add_module_hint', { defaultValue: 'Build your own · developer guide' })}
-                </span>
-              </span>
-            )}
-          </NavLink>
-        </div>
-        {/* Request-a-custom-module CTA — second dashed tile, purple
-             accent, opens a popup instead of navigating. The popup
-             routes the request to two destinations depending on the
-             user's choice:
-               • "Could help others too"  → community / GitHub backlog
-                 → ends up in a future open-source release.
-               • "Only for my company"    → private / bespoke quote
-                 → DDC team replies with scope + price.
-             We keep this distinct from the developer-guide tile above
-             on purpose: contributors who want to build a module
-             themselves use the guide; users who want us to build it
-             for them use this dialog. */}
-        <div className={clsx('pt-1 pb-3', iconified ? 'px-0 flex justify-center' : 'px-3')}>
-          <button
-            type="button"
-            onClick={() => {
-              setCustomModuleOpen(true);
-              onClose?.();
-            }}
-            title={
-              iconified
-                ? t('nav.request_custom_module', { defaultValue: 'Request a custom module' })
-                : undefined
-            }
-            className={clsx(
-              'group flex items-center rounded-lg border border-dashed border-purple-400/40 bg-gradient-to-br from-purple-500/5 via-transparent to-purple-50/40 dark:from-purple-500/10 dark:via-transparent dark:to-slate-900/30 hover:border-purple-500 hover:from-purple-500/10 hover:shadow-sm transition-all text-left',
-              iconified ? 'h-9 w-9 justify-center' : 'w-full gap-2.5 px-2.5 py-2',
-            )}
-            aria-haspopup="dialog"
-            aria-expanded={customModuleOpen}
-          >
-            <span className="shrink-0 flex h-7 w-7 items-center justify-center rounded-md bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-300 group-hover:bg-purple-600 group-hover:text-white transition-colors">
-              <Sparkles size={14} strokeWidth={2.25} />
-            </span>
-            {!iconified && (
-              <span className="min-w-0 flex-1">
-                <span className="block text-xs font-semibold text-content-primary leading-tight">
-                  {t('nav.request_custom_module', {
-                    defaultValue: 'Request a custom module',
-                  })}
-                </span>
-                <span className="block text-[10px] text-content-tertiary leading-tight mt-0.5 truncate">
-                  {t('nav.request_custom_module_hint', {
-                    defaultValue: 'Missing something? Tell us what you need',
-                  })}
-                </span>
-              </span>
-            )}
-          </button>
-        </div>
       </nav>
 
       {/* Admin / setup surfaces — rendered as a 2-column button grid
@@ -1462,120 +1273,39 @@ export function Sidebar({ onClose }: { onClose?: () => void }) {
           </div>
         )}
 
-        {/* Featured article card - links out to the long-form article on the
-            uberization of construction and the idea behind the platform.
-            Hidden in icon-only mode (the title + subtitle need width). */}
-        {!iconified && (
-          <div className="mt-2">
-            <ArticleNewsCard />
-          </div>
-        )}
-
-        {/* Version + AGPL + GitHub link
-            Layout: GitHub icon (left) · version · AGPL link.
-            The GitHub link uses Lucide's Github mark — keeps the row aligned
-            with the rest of the sidebar's lucide icons and gives a clear
-            visual entry point to the source repo. */}
+        {/* Version + AGPL source-offer link (§ glyph in icon-only mode). */}
         {iconified ? (
-          // Icon-only footer: GitHub + Telegram stacked. The expand
-          // toggle lives on the floating edge-pill, not down here, so
-          // users see only one toggle entry-point — no duplicate UI.
+          // Icon-only footer: source-offer link only (AGPL-3.0
+          // requirement). The GitHub/Telegram community links this fork
+          // dropped promoted the upstream OpenConstructionERP project,
+          // not this deployment.
           <div className="pt-2 pb-1 flex flex-col items-center gap-1">
             <a
-              href="https://github.com/datadrivenconstruction/OpenConstructionERP"
+              href="/api/source"
               target="_blank"
               rel="noopener noreferrer"
-              title={`${t('sidebar.github_repo', { defaultValue: 'GitHub repository' })} (v${APP_VERSION})`}
-              aria-label={t('sidebar.github_repo', { defaultValue: 'GitHub repository' })}
-              className="flex h-8 w-8 items-center justify-center rounded-md border border-border-light bg-surface-primary hover:bg-surface-elevated transition-all"
+              title={`AGPL-3.0 (v${APP_VERSION})`}
+              aria-label="AGPL-3.0 source"
+              className="flex h-8 w-8 items-center justify-center rounded-md border border-border-light bg-surface-primary hover:bg-surface-elevated transition-all text-2xs font-semibold text-content-secondary"
             >
-              <Github size={13} strokeWidth={1.75} className="text-content-secondary" />
-            </a>
-            <a
-              href="https://t.me/datadrivenconstruction"
-              target="_blank"
-              rel="noopener noreferrer"
-              title={t('sidebar.community_title', { defaultValue: 'Community' })}
-              aria-label={t('sidebar.telegram_community', { defaultValue: 'Telegram community' })}
-              className="flex h-8 w-8 items-center justify-center rounded-md border border-border-light bg-surface-primary hover:bg-surface-elevated transition-all"
-            >
-              <svg viewBox="0 0 24 24" fill="currentColor" className="h-[13px] w-[13px] text-content-secondary" aria-hidden>
-                <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71l-4.14-3.06-1.99 1.93c-.23.23-.42.42-.83.42z" />
-              </svg>
+              §
             </a>
           </div>
         ) : (
-          // GitHub / Community / version row.
-          //
-          // The horizontal padding here MUST mirror AdminGrid's column geometry
-          // (the parent `<div>` already gives us `px-2`; AdminGrid's `<ul>` uses
-          // `grid-cols-2 gap-1` with no extra inner padding). Earlier this row
-          // wrapped its buttons in another `px-2`, which made each button
-          // ~8 px narrower than every admin tile above. The buttons are now
-          // siblings of the admin grid in the layout coordinate space:
-          // same outer `px-2`, same `gap-1` between the two cards.
-          <div className="pb-2 pt-1 flex flex-col gap-1.5">
-            <div className="grid grid-cols-2 gap-1">
-              <a
-                href="https://github.com/datadrivenconstruction/OpenConstructionERP"
-                target="_blank"
-                rel="noopener noreferrer"
-                title={t('sidebar.github_repo', { defaultValue: 'GitHub repository' })}
-                aria-label={t('sidebar.github_repo', { defaultValue: 'GitHub repository' })}
-                className={clsx(
-                  'group flex h-8 w-full items-center justify-start gap-1.5 rounded-md border px-2 text-left transition-colors duration-fast ease-oe',
-                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
-                  'border-border-light/60 bg-surface-primary text-content-secondary hover:bg-surface-secondary hover:text-content-primary hover:border-border-medium',
-                )}
-              >
-                <Github size={14} strokeWidth={1.75} aria-hidden className="shrink-0 text-content-secondary" />
-                <span className="min-w-0 flex-1 text-[11px] font-medium leading-none whitespace-nowrap overflow-hidden text-ellipsis text-content-secondary">
-                  GitHub
-                </span>
-              </a>
-              <a
-                href="https://t.me/datadrivenconstruction"
-                target="_blank"
-                rel="noopener noreferrer"
-                title={t('sidebar.join_telegram', { defaultValue: 'Join the Telegram community' })}
-                aria-label={t('sidebar.telegram_community', { defaultValue: 'Telegram community' })}
-                className={clsx(
-                  'group flex h-8 w-full items-center justify-start gap-1.5 rounded-md border px-2 text-left transition-colors duration-fast ease-oe',
-                  'focus:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40',
-                  'border-border-light/60 bg-surface-primary text-content-secondary hover:bg-surface-secondary hover:text-content-primary hover:border-border-medium',
-                )}
-              >
-                <svg viewBox="0 0 24 24" fill="currentColor" className="h-[14px] w-[14px] shrink-0 text-content-secondary" aria-hidden>
-                  <path d="M9.78 18.65l.28-4.23 7.68-6.92c.34-.31-.07-.46-.52-.19L7.74 13.3 3.64 12c-.88-.25-.89-.86.2-1.3l15.97-6.16c.73-.33 1.43.18 1.15 1.3l-2.72 12.81c-.19.91-.74 1.13-1.5.71l-4.14-3.06-1.99 1.93c-.23.23-.42.42-.83.42z" />
-                </svg>
-                <span className="min-w-0 flex-1 text-[11px] font-medium leading-none whitespace-nowrap overflow-hidden text-ellipsis text-content-secondary">
-                  {t('sidebar.community_title', { defaultValue: 'Community' })}
-                </span>
-              </a>
-            </div>
-            <div className="flex items-center justify-center gap-1.5 min-w-0">
-              <span className="text-2xs text-content-tertiary">v{APP_VERSION}</span>
-              <span className="text-2xs text-content-quaternary/40">·</span>
-              <a
-                href="/api/source"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-2xs text-content-tertiary hover:text-content-secondary transition-colors"
-              >
-                AGPL-3.0
-              </a>
-            </div>
+          <div className="pb-2 pt-1 flex items-center justify-center gap-1.5">
+            <span className="text-2xs text-content-tertiary">v{APP_VERSION}</span>
+            <span className="text-2xs text-content-quaternary/40">·</span>
+            <a
+              href="/api/source"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-2xs text-content-tertiary hover:text-content-secondary transition-colors"
+            >
+              AGPL-3.0
+            </a>
           </div>
         )}
       </div>
-      {/* Mounted at the aside root so the dialog escapes any
-          z-index / overflow trap imposed by the inner nav scroller.
-          The dialog itself is full-screen modal (fixed inset-0) and
-          self-renders only when open=true. */}
-      <RequestCustomModuleDialog
-        open={customModuleOpen}
-        onClose={() => setCustomModuleOpen(false)}
-      />
     </aside>
   );
 }

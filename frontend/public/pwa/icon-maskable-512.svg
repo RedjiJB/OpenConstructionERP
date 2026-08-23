@@ -1,18 +1,27 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" fill="none">
   <defs>
-    <linearGradient id="lg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#0284c7"/>
-      <stop offset="100%" stop-color="#5856d6"/>
+    <linearGradient id="sky" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#eef7f0"/>
+      <stop offset="100%" stop-color="#dff0e3"/>
     </linearGradient>
   </defs>
   <!-- Full-bleed background — required for maskable icons; safe zone is the
        central 80% (51.2 px padding all sides). All glyph content fits well
        inside that envelope. -->
-  <rect x="0" y="0" width="512" height="512" fill="url(#lg)"/>
-  <g transform="translate(80, 80) scale(0.6875)">
-    <rect x="102" y="296" width="42" height="114" rx="6" fill="#fff" opacity=".85"/>
-    <rect x="162" y="233" width="42" height="177" rx="6" fill="#fff" opacity=".95"/>
-    <rect x="222" y="176" width="42" height="234" rx="6" fill="#fff" opacity=".85"/>
-    <rect x="282" y="150" width="128" height="260" rx="8" fill="#fff" opacity=".9"/>
+  <rect x="0" y="0" width="512" height="512" fill="url(#sky)"/>
+  <g transform="translate(51, 51) scale(0.8)">
+    <circle cx="180" cy="188" r="58" fill="#f2a71b"/>
+    <g stroke="#f2a71b" stroke-width="16" stroke-linecap="round">
+      <line x1="180" y1="70" x2="180" y2="102"/>
+      <line x1="180" y1="274" x2="180" y2="306"/>
+      <line x1="58" y1="188" x2="90" y2="188"/>
+      <line x1="270" y1="188" x2="302" y2="188"/>
+      <line x1="98" y1="106" x2="121" y2="129"/>
+      <line x1="239" y1="247" x2="262" y2="270"/>
+      <line x1="262" y1="106" x2="239" y2="129"/>
+    </g>
+    <path d="M32 460 C 120 380, 200 420, 280 380 C 360 340, 420 400, 480 370 V 480 H 32 Z" fill="#256e33"/>
+    <path d="M32 480 C 130 420, 220 460, 320 420 C 390 392, 440 430, 480 410 V 480 H 32 Z" fill="#35a049"/>
+    <path d="M32 480 C 150 452, 260 480, 360 452 C 410 438, 450 456, 480 448 V 480 H 32 Z" fill="#2e8b3f"/>
   </g>
 </svg>

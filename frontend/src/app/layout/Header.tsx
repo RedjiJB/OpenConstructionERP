@@ -14,8 +14,6 @@ import { useThemeStore } from '@/stores/useThemeStore';
 import { CountryFlag, ModuleInfoButton, PartnerLogoBadge } from '@/shared/ui';
 import { usePartnerPack } from '@/shared/hooks/usePartnerPack';
 import { NotificationBell } from '@/shared/ui/NotificationBell';
-import { HeaderNewsButton } from '@/shared/ui/HeaderNewsButton';
-import { ModuleBuilderButton } from '@/features/module-builder';
 import { apiGet } from '@/shared/lib/api';
 import { copyToClipboard } from '@/shared/lib/browser';
 import {
@@ -28,9 +26,6 @@ import { APP_VERSION, APP_BUILD_FINGERPRINT } from '@/shared/lib/version';
 import { useToastStore } from '@/stores/useToastStore';
 import { useI18nReady } from '@/shared/lib/useI18nReady';
 import { isTauri, openAppInBrowser, openLink } from '@/shared/lib/desktop';
-import { SupportUsButton } from './SupportUsButton';
-import { SubscribeButton } from './SubscribeButton';
-import { ProjectJourneyButton } from './ProjectJourney';
 import { getRouteIcon } from './routeIcons';
 import { isModuleI18nKey } from '@/modules/_i18n';
 
@@ -369,9 +364,13 @@ export function Header({ title, onMenuClick }: HeaderProps) {
           </button>
         )}
 
-        {/* Active project switcher (rendered first so the breadcrumb
-            reads left-to-right as ProjectName › PageTitle). */}
-        <ProjectSwitcher />
+        {/* D-Central FieldOps fork (Task #156): ProjectSwitcher (the
+            "Open this project" / "Switch Project" breadcrumb) managed a
+            real multi-project workspace that has no backing concept
+            here -- this deployment runs on one fixed synthetic project
+            (see App.tsx). Its "Open this project" action pointed at the
+            now-pruned /projects/:id route regardless. Dropped rather
+            than left showing an empty project list. */}
 
         {translatedTitle && (
           <>
@@ -439,21 +438,16 @@ export function Header({ title, onMenuClick }: HeaderProps) {
       {/* Right side — three zones separated by hairline dividers.
           Zone 2: Search · Zone 3: Notifications + Help · Zone 4: Account
           (Upload + Language + User). Each zone has internal `gap-1`,
-          dividers between zones are 1px hairlines.
-
-          SubscribeButton lives in Zone 3 next to HelpMenu (sized to
-          match the Support pill — same h-8 icon-with-label format on
-          desktop, icon-only on mobile). It used to sit absolutely
-          centred across the header but that created awkward visual
-          tension with the project switcher on the left; planted next
-          to Support/Help, the two CTAs read as a coherent cluster. */}
+          dividers between zones are 1px hairlines. */}
       <div className="flex items-center gap-2 shrink-0">
-        {/* ── Journey (orientation) ─────────────────────────────────
-            Names the lifecycle phase the current screen belongs to and
-            opens the whole-platform journey map. First in the cluster so it
-            reads as "where am I" ahead of the action buttons. */}
-        <ProjectJourneyButton />
-        <div className="hidden sm:block h-4 w-px bg-border-light/70" aria-hidden />
+        {/* D-Central FieldOps fork (Task #156): ProjectJourneyButton
+            opened a whole-platform lifecycle map whose ~60 route chips
+            were built for OpenConstructionERP's full ~200-route surface
+            -- only 4 of them survived this fork's pruning pass (see
+            docs/ARCHITECTURE.md's Task #156 status entries). Rebuilding
+            a meaningful "journey" for a flat 8-module tool doesn't make
+            sense, so the button is dropped rather than left pointing at
+            a mostly-dead-link dialog. */}
 
         {/* ── Zone 2 (Search) ──────────────────────────────────────── */}
         <button
@@ -496,21 +490,22 @@ export function Header({ title, onMenuClick }: HeaderProps) {
         {/* Hairline divider between Zone 2 and Zone 3. */}
         <div className="hidden sm:block h-4 w-px bg-border-light/70" aria-hidden />
 
-        {/* ── Zone 3 (Notifications + Subscribe + Bug + Help) ──────
-            Order: NotificationBell · What's new · SupportUs · Subscribe · BugReport · Help.
-            The "ask the user for something" CTAs (Support / Subscribe) stay
-            adjacent; Bug + Help sit on the right edge so a user filing a
-            report doesn't have to scan past the marketing CTAs. */}
+        {/* ── Zone 3 (Notifications) ──────
+            D-Central FieldOps fork: What's new, Build a module, Support
+            us, and Subscribe were all OpenConstructionERP-the-product
+            marketing/growth surfaces (external links to
+            openconstructionerp.com, a module-marketplace wizard with no
+            surviving destination route) -- dropped, not rebranded, since
+            none of them describe this deployment. BugReportMenu and
+            HelpMenu are dropped too: their content (a GitHub issue
+            template against datadrivenconstruction/OpenConstructionERP,
+            a support mailto to the vendor, an in-app "How it works" hub
+            at the now-pruned /how-it-works) all pointed at the vendor's
+            own support channels, not anything Sod Boys Ltd could stand
+            behind -- there's no Sod-Boys-specific replacement to invent
+            for a support flow that requires knowing the client's real
+            internal process. */}
         <NotificationBell />
-        <HeaderNewsButton />
-        {/* Building a module is something you do from wherever you noticed the
-            platform was missing one, so it lives here rather than in the
-            sidebar. Renders nothing for anyone who may not install one. */}
-        <ModuleBuilderButton />
-        <SupportUsButton />
-        <SubscribeButton />
-        <BugReportMenu />
-        <HelpMenu />
 
         {/* Hairline divider between Zone 3 and Zone 4. */}
         <div className="hidden sm:block h-4 w-px bg-border-light/70" aria-hidden />
@@ -1374,22 +1369,12 @@ function UserMenu() {
               <div className="my-1 border-t border-border-light" role="separator" />
             </>
           )}
-          <button
-            role="menuitem"
-            onClick={() => { setOpen(false); navigate('/settings'); }}
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
-          >
-            <User size={14} className="text-content-tertiary" />
-            {t('auth.profile', 'Profile')}
-          </button>
-          <button
-            role="menuitem"
-            onClick={() => { setOpen(false); navigate('/settings'); }}
-            className="flex w-full items-center gap-2.5 px-3 py-2 text-sm text-content-primary hover:bg-surface-secondary transition-colors"
-          >
-            <Settings size={14} className="text-content-tertiary" />
-            {t('nav.settings', 'Settings')}
-          </button>
+          {/* D-Central FieldOps fork (Task #156): Profile and Settings
+              both navigated to /settings, which this fork's route
+              pruning removed -- self-service profile/settings editing
+              isn't wired (admin-provisioned only, see
+              docs/ARCHITECTURE.md's Task #156 status entries). Dropped
+              rather than left as dead links. */}
           <div className="my-1 border-t border-border-light" role="separator" />
           <button
             role="menuitem"

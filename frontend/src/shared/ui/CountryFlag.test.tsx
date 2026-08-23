@@ -19,7 +19,11 @@ describe('CountryFlag', () => {
   it('found the language list', () => {
     // If the literal is reformatted the regex above stops matching, and a test
     // that iterates an empty list passes while checking nothing.
-    expect(languages.length).toBeGreaterThan(25);
+    //
+    // D-Central FieldOps fork (Task #156): SUPPORTED_LANGUAGES was trimmed
+    // from ~40 locales to the 2 (en/fr) Sod Boys Ltd's crew needs (see
+    // src/app/i18n.ts) -- scaled down from 25 along with it, not removed.
+    expect(languages.length).toBeGreaterThan(1);
   });
 
   // Adding a language is two edits in two files, and forgetting the second one

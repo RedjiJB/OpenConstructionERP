@@ -147,12 +147,12 @@ export default defineConfig({
       devOptions: { enabled: false },
       includeAssets: ['favicon.svg', 'pwa/*.svg'],
       manifest: {
-        name: 'OpenConstructionERP',
-        short_name: 'OCERP',
+        name: 'Sod Boys FieldOps',
+        short_name: 'FieldOps',
         description:
-          'Open-source construction cost estimation, BIM takeoff, BOQ, tendering and field operations.',
-        theme_color: '#0284c7',
-        background_color: '#f7fbff',
+          'Sod Boys Ltd field operations: equipment, crew, timeclock, site inventory, procurement, payroll, and notifications.',
+        theme_color: '#2e8b3f',
+        background_color: '#eef7f0',
         display: 'standalone',
         orientation: 'any',
         start_url: '/',

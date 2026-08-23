@@ -32,7 +32,6 @@
 
 import { Fragment, useCallback, useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   AlertTriangle,
@@ -85,14 +84,6 @@ function errorDetail(err: unknown, fallback: string): string {
   const detail = (err as { body?: { detail?: string } })?.body?.detail;
   if (typeof detail === 'string' && detail) return detail;
   return err instanceof Error && err.message ? err.message : fallback;
-}
-
-function ModLink({ to, children }: { to: string; children: ReactNode }) {
-  return (
-    <Link to={to} className="font-medium text-oe-blue-text hover:underline">
-      {children}
-    </Link>
-  );
 }
 
 /* ── Explainer ─────────────────────────────────────────────────────────── */
@@ -184,16 +175,6 @@ function HowTeamVisibilityWorks() {
         ))}
       </ol>
 
-      <div className="mt-3 flex flex-col gap-1.5 border-t border-border-light pt-3 text-2xs text-content-tertiary sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-5 sm:gap-y-1">
-        <span>
-          <span className="font-medium text-content-secondary">
-            {t('teams.flow_connects', 'Connects with:')}
-          </span>{' '}
-          <ModLink to="/projects">{t('teams.mod_projects', 'Projects')}</ModLink> ·{' '}
-          <ModLink to="/users">{t('teams.mod_users', 'User management')}</ModLink> ·{' '}
-          <ModLink to="/files">{t('teams.mod_files', 'Files')}</ModLink>
-        </span>
-      </div>
     </CollapsibleSection>
   );
 }

@@ -5702,25 +5702,20 @@ exports[`Visual Regression - Logo > Logo - large with animation 1`] = `
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
-        <lineargradient
-          id="oe-lg-lg-a"
-          x1="0%"
-          x2="100%"
-          y1="0%"
-          y2="100%"
+        <clippath
+          id="oe-lg-clip-lg"
         >
-          <stop
-            offset="0%"
-            stop-color="#0066ff"
+          <rect
+            height="448"
+            rx="96"
+            width="448"
+            x="32"
+            y="32"
           />
-          <stop
-            offset="100%"
-            stop-color="#5856d6"
-          />
-        </lineargradient>
+        </clippath>
       </defs>
       <rect
-        fill="url(#oe-lg-lg-a)"
+        fill="#eef7f0"
         height="448"
         rx="96"
         style="animation: oeBgScale 450ms cubic-bezier(0.34,1.56,0.64,1) both;"
@@ -5728,118 +5723,88 @@ exports[`Visual Regression - Logo > Logo - large with animation 1`] = `
         x="32"
         y="32"
       />
-      <rect
-        fill="#fff"
-        height="114"
-        opacity=".85"
-        rx="6"
-        style="transform-origin: bottom; animation: oeBarGrow 500ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 120ms;"
-        width="42"
-        x="102"
-        y="296"
-      />
-      <rect
-        fill="#fff"
-        height="177"
-        opacity=".95"
-        rx="6"
-        style="transform-origin: bottom; animation: oeBarGrow 500ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 200ms;"
-        width="42"
-        x="162"
-        y="233"
-      />
-      <rect
-        fill="#fff"
-        height="234"
-        opacity=".85"
-        rx="6"
-        style="transform-origin: bottom; animation: oeBarGrow 500ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 280ms;"
-        width="42"
-        x="222"
-        y="176"
-      />
-      <rect
-        fill="#fff"
-        height="260"
-        opacity=".9"
-        rx="8"
-        style="animation: oeBuildingSlide 600ms cubic-bezier(0.22,1,0.36,1) both; animation-delay: 300ms;"
-        width="128"
-        x="282"
-        y="150"
-      />
       <g
-        style="animation: oeBuildingSlide 600ms cubic-bezier(0.22,1,0.36,1) both; animation-delay: 300ms;"
+        clip-path="url(#oe-lg-clip-lg)"
       >
-        <rect
-          fill="url(#oe-lg-lg-a)"
-          height="28"
-          opacity=".5"
-          rx="4"
-          style="animation: oeWindowFade 400ms ease both; animation-delay: 550ms;"
-          width="26"
-          x="304"
-          y="182"
+        <g
+          style="animation: oeBuildingSlide 600ms cubic-bezier(0.22,1,0.36,1) both; animation-delay: 300ms;"
+        >
+          <circle
+            cx="180"
+            cy="188"
+            fill="#f2a71b"
+            r="58"
+          />
+          <g
+            stroke="#f2a71b"
+            stroke-linecap="round"
+            stroke-width="16"
+          >
+            <line
+              style="animation: oeWindowFade 400ms ease both; animation-delay: 550ms;"
+              x1="180"
+              x2="180"
+              y1="70"
+              y2="102"
+            />
+            <line
+              style="animation: oeWindowFade 400ms ease both; animation-delay: 600ms;"
+              x1="180"
+              x2="180"
+              y1="274"
+              y2="306"
+            />
+            <line
+              style="animation: oeWindowFade 400ms ease both; animation-delay: 650ms;"
+              x1="58"
+              x2="90"
+              y1="188"
+              y2="188"
+            />
+            <line
+              style="animation: oeWindowFade 400ms ease both; animation-delay: 700ms;"
+              x1="270"
+              x2="302"
+              y1="188"
+              y2="188"
+            />
+            <line
+              style="animation: oeWindowFade 400ms ease both; animation-delay: 750ms;"
+              x1="98"
+              x2="121"
+              y1="106"
+              y2="129"
+            />
+            <line
+              style="animation: oeWindowFade 400ms ease both; animation-delay: 800ms;"
+              x1="239"
+              x2="262"
+              y1="247"
+              y2="270"
+            />
+            <line
+              style="animation: oeWindowFade 400ms ease both; animation-delay: 850ms;"
+              x1="262"
+              x2="239"
+              y1="106"
+              y2="129"
+            />
+          </g>
+        </g>
+        <path
+          d="M32 460 C 120 380, 200 420, 280 380 C 360 340, 420 400, 480 370 V 480 H 32 Z"
+          fill="#256e33"
+          style="transform-origin: bottom; animation: oeBarGrow 500ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 120ms;"
         />
-        <rect
-          fill="url(#oe-lg-lg-a)"
-          height="28"
-          opacity=".5"
-          rx="4"
-          style="animation: oeWindowFade 400ms ease both; animation-delay: 600ms;"
-          width="26"
-          x="362"
-          y="182"
+        <path
+          d="M32 480 C 130 420, 220 460, 320 420 C 390 392, 440 430, 480 410 V 480 H 32 Z"
+          fill="#35a049"
+          style="transform-origin: bottom; animation: oeBarGrow 500ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 200ms;"
         />
-        <rect
-          fill="url(#oe-lg-lg-a)"
-          height="28"
-          opacity=".5"
-          rx="4"
-          style="animation: oeWindowFade 400ms ease both; animation-delay: 650ms;"
-          width="26"
-          x="304"
-          y="226"
-        />
-        <rect
-          fill="url(#oe-lg-lg-a)"
-          height="28"
-          opacity=".5"
-          rx="4"
-          style="animation: oeWindowFade 400ms ease both; animation-delay: 700ms;"
-          width="26"
-          x="362"
-          y="226"
-        />
-        <rect
-          fill="url(#oe-lg-lg-a)"
-          height="28"
-          opacity=".45"
-          rx="4"
-          style="animation: oeWindowFade 400ms ease both; animation-delay: 750ms;"
-          width="26"
-          x="304"
-          y="272"
-        />
-        <rect
-          fill="url(#oe-lg-lg-a)"
-          height="28"
-          opacity=".45"
-          rx="4"
-          style="animation: oeWindowFade 400ms ease both; animation-delay: 800ms;"
-          width="26"
-          x="362"
-          y="272"
-        />
-        <rect
-          fill="url(#oe-lg-lg-a)"
-          height="82"
-          opacity=".55"
-          rx="4"
-          style="animation: oeWindowFade 400ms ease both; animation-delay: 850ms;"
-          width="34"
-          x="329"
-          y="328"
+        <path
+          d="M32 480 C 150 452, 260 480, 360 452 C 410 438, 450 456, 480 448 V 480 H 32 Z"
+          fill="#2e8b3f"
+          style="transform-origin: bottom; animation: oeBarGrow 500ms cubic-bezier(0.34,1.56,0.64,1) both; animation-delay: 280ms;"
         />
       </g>
     </svg>
@@ -5859,67 +5824,50 @@ exports[`Visual Regression - Logo > Logo - small 1`] = `
       xmlns="http://www.w3.org/2000/svg"
     >
       <defs>
-        <lineargradient
-          id="oe-lg-sm-s"
-          x1="0%"
-          x2="100%"
-          y1="0%"
-          y2="100%"
+        <clippath
+          id="oe-lg-clip-sm"
         >
-          <stop
-            offset="0%"
-            stop-color="#0066ff"
+          <rect
+            height="448"
+            rx="96"
+            width="448"
+            x="32"
+            y="32"
           />
-          <stop
-            offset="100%"
-            stop-color="#5856d6"
-          />
-        </lineargradient>
+        </clippath>
       </defs>
       <rect
-        fill="url(#oe-lg-sm-s)"
+        fill="#eef7f0"
         height="448"
         rx="96"
         width="448"
         x="32"
         y="32"
       />
-      <rect
-        fill="#fff"
-        height="114"
-        opacity=".85"
-        rx="6"
-        width="42"
-        x="102"
-        y="296"
-      />
-      <rect
-        fill="#fff"
-        height="177"
-        opacity=".95"
-        rx="6"
-        width="42"
-        x="162"
-        y="233"
-      />
-      <rect
-        fill="#fff"
-        height="234"
-        opacity=".85"
-        rx="6"
-        width="42"
-        x="222"
-        y="176"
-      />
-      <rect
-        fill="#fff"
-        height="260"
-        opacity=".9"
-        rx="8"
-        width="128"
-        x="282"
-        y="150"
-      />
+      <g
+        clip-path="url(#oe-lg-clip-sm)"
+      >
+        <g>
+          <circle
+            cx="180"
+            cy="188"
+            fill="#f2a71b"
+            r="58"
+          />
+        </g>
+        <path
+          d="M32 460 C 120 380, 200 420, 280 380 C 360 340, 420 400, 480 370 V 480 H 32 Z"
+          fill="#256e33"
+        />
+        <path
+          d="M32 480 C 130 420, 220 460, 320 420 C 390 392, 440 430, 480 410 V 480 H 32 Z"
+          fill="#35a049"
+        />
+        <path
+          d="M32 480 C 150 452, 260 480, 360 452 C 410 438, 450 456, 480 448 V 480 H 32 Z"
+          fill="#2e8b3f"
+        />
+      </g>
     </svg>
   </div>
 </div>
@@ -5940,130 +5888,96 @@ exports[`Visual Regression - Logo > LogoWithText - default 1`] = `
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          <lineargradient
-            id="oe-lg-md-s"
-            x1="0%"
-            x2="100%"
-            y1="0%"
-            y2="100%"
+          <clippath
+            id="oe-lg-clip-md"
           >
-            <stop
-              offset="0%"
-              stop-color="#0066ff"
+            <rect
+              height="448"
+              rx="96"
+              width="448"
+              x="32"
+              y="32"
             />
-            <stop
-              offset="100%"
-              stop-color="#5856d6"
-            />
-          </lineargradient>
+          </clippath>
         </defs>
         <rect
-          fill="url(#oe-lg-md-s)"
+          fill="#eef7f0"
           height="448"
           rx="96"
           width="448"
           x="32"
           y="32"
         />
-        <rect
-          fill="#fff"
-          height="114"
-          opacity=".85"
-          rx="6"
-          width="42"
-          x="102"
-          y="296"
-        />
-        <rect
-          fill="#fff"
-          height="177"
-          opacity=".95"
-          rx="6"
-          width="42"
-          x="162"
-          y="233"
-        />
-        <rect
-          fill="#fff"
-          height="234"
-          opacity=".85"
-          rx="6"
-          width="42"
-          x="222"
-          y="176"
-        />
-        <rect
-          fill="#fff"
-          height="260"
-          opacity=".9"
-          rx="8"
-          width="128"
-          x="282"
-          y="150"
-        />
-        <g>
-          <rect
-            fill="url(#oe-lg-md-s)"
-            height="28"
-            opacity=".5"
-            rx="4"
-            width="26"
-            x="304"
-            y="182"
+        <g
+          clip-path="url(#oe-lg-clip-md)"
+        >
+          <g>
+            <circle
+              cx="180"
+              cy="188"
+              fill="#f2a71b"
+              r="58"
+            />
+            <g
+              stroke="#f2a71b"
+              stroke-linecap="round"
+              stroke-width="16"
+            >
+              <line
+                x1="180"
+                x2="180"
+                y1="70"
+                y2="102"
+              />
+              <line
+                x1="180"
+                x2="180"
+                y1="274"
+                y2="306"
+              />
+              <line
+                x1="58"
+                x2="90"
+                y1="188"
+                y2="188"
+              />
+              <line
+                x1="270"
+                x2="302"
+                y1="188"
+                y2="188"
+              />
+              <line
+                x1="98"
+                x2="121"
+                y1="106"
+                y2="129"
+              />
+              <line
+                x1="239"
+                x2="262"
+                y1="247"
+                y2="270"
+              />
+              <line
+                x1="262"
+                x2="239"
+                y1="106"
+                y2="129"
+              />
+            </g>
+          </g>
+          <path
+            d="M32 460 C 120 380, 200 420, 280 380 C 360 340, 420 400, 480 370 V 480 H 32 Z"
+            fill="#256e33"
           />
-          <rect
-            fill="url(#oe-lg-md-s)"
-            height="28"
-            opacity=".5"
-            rx="4"
-            width="26"
-            x="362"
-            y="182"
+          <path
+            d="M32 480 C 130 420, 220 460, 320 420 C 390 392, 440 430, 480 410 V 480 H 32 Z"
+            fill="#35a049"
           />
-          <rect
-            fill="url(#oe-lg-md-s)"
-            height="28"
-            opacity=".5"
-            rx="4"
-            width="26"
-            x="304"
-            y="226"
-          />
-          <rect
-            fill="url(#oe-lg-md-s)"
-            height="28"
-            opacity=".5"
-            rx="4"
-            width="26"
-            x="362"
-            y="226"
-          />
-          <rect
-            fill="url(#oe-lg-md-s)"
-            height="28"
-            opacity=".45"
-            rx="4"
-            width="26"
-            x="304"
-            y="272"
-          />
-          <rect
-            fill="url(#oe-lg-md-s)"
-            height="28"
-            opacity=".45"
-            rx="4"
-            width="26"
-            x="362"
-            y="272"
-          />
-          <rect
-            fill="url(#oe-lg-md-s)"
-            height="82"
-            opacity=".55"
-            rx="4"
-            width="34"
-            x="329"
-            y="328"
+          <path
+            d="M32 480 C 150 452, 260 480, 360 452 C 410 438, 450 456, 480 448 V 480 H 32 Z"
+            fill="#2e8b3f"
           />
         </g>
       </svg>
@@ -6072,16 +5986,15 @@ exports[`Visual Regression - Logo > LogoWithText - default 1`] = `
       class="text-[17px] leading-none font-medium text-content-primary whitespace-nowrap tracking-tight"
       style="font-family: "Plus Jakarta Sans", system-ui, sans-serif; letter-spacing: -0.02em;"
     >
-      Open
       <span
         class="text-oe-blue"
       >
-        Construction
+        Sod Boys
       </span>
       <span
         class="text-content-quaternary"
       >
-        ERP
+         FieldOps
       </span>
     </span>
   </div>
@@ -6103,130 +6016,96 @@ exports[`Visual Regression - Logo > LogoWithText - without version 1`] = `
         xmlns="http://www.w3.org/2000/svg"
       >
         <defs>
-          <lineargradient
-            id="oe-lg-md-s"
-            x1="0%"
-            x2="100%"
-            y1="0%"
-            y2="100%"
+          <clippath
+            id="oe-lg-clip-md"
           >
-            <stop
-              offset="0%"
-              stop-color="#0066ff"
+            <rect
+              height="448"
+              rx="96"
+              width="448"
+              x="32"
+              y="32"
             />
-            <stop
-              offset="100%"
-              stop-color="#5856d6"
-            />
-          </lineargradient>
+          </clippath>
         </defs>
         <rect
-          fill="url(#oe-lg-md-s)"
+          fill="#eef7f0"
           height="448"
           rx="96"
           width="448"
           x="32"
           y="32"
         />
-        <rect
-          fill="#fff"
-          height="114"
-          opacity=".85"
-          rx="6"
-          width="42"
-          x="102"
-          y="296"
-        />
-        <rect
-          fill="#fff"
-          height="177"
-          opacity=".95"
-          rx="6"
-          width="42"
-          x="162"
-          y="233"
-        />
-        <rect
-          fill="#fff"
-          height="234"
-          opacity=".85"
-          rx="6"
-          width="42"
-          x="222"
-          y="176"
-        />
-        <rect
-          fill="#fff"
-          height="260"
-          opacity=".9"
-          rx="8"
-          width="128"
-          x="282"
-          y="150"
-        />
-        <g>
-          <rect
-            fill="url(#oe-lg-md-s)"
-            height="28"
-            opacity=".5"
-            rx="4"
-            width="26"
-            x="304"
-            y="182"
+        <g
+          clip-path="url(#oe-lg-clip-md)"
+        >
+          <g>
+            <circle
+              cx="180"
+              cy="188"
+              fill="#f2a71b"
+              r="58"
+            />
+            <g
+              stroke="#f2a71b"
+              stroke-linecap="round"
+              stroke-width="16"
+            >
+              <line
+                x1="180"
+                x2="180"
+                y1="70"
+                y2="102"
+              />
+              <line
+                x1="180"
+                x2="180"
+                y1="274"
+                y2="306"
+              />
+              <line
+                x1="58"
+                x2="90"
+                y1="188"
+                y2="188"
+              />
+              <line
+                x1="270"
+                x2="302"
+                y1="188"
+                y2="188"
+              />
+              <line
+                x1="98"
+                x2="121"
+                y1="106"
+                y2="129"
+              />
+              <line
+                x1="239"
+                x2="262"
+                y1="247"
+                y2="270"
+              />
+              <line
+                x1="262"
+                x2="239"
+                y1="106"
+                y2="129"
+              />
+            </g>
+          </g>
+          <path
+            d="M32 460 C 120 380, 200 420, 280 380 C 360 340, 420 400, 480 370 V 480 H 32 Z"
+            fill="#256e33"
           />
-          <rect
-            fill="url(#oe-lg-md-s)"
-            height="28"
-            opacity=".5"
-            rx="4"
-            width="26"
-            x="362"
-            y="182"
+          <path
+            d="M32 480 C 130 420, 220 460, 320 420 C 390 392, 440 430, 480 410 V 480 H 32 Z"
+            fill="#35a049"
           />
-          <rect
-            fill="url(#oe-lg-md-s)"
-            height="28"
-            opacity=".5"
-            rx="4"
-            width="26"
-            x="304"
-            y="226"
-          />
-          <rect
-            fill="url(#oe-lg-md-s)"
-            height="28"
-            opacity=".5"
-            rx="4"
-            width="26"
-            x="362"
-            y="226"
-          />
-          <rect
-            fill="url(#oe-lg-md-s)"
-            height="28"
-            opacity=".45"
-            rx="4"
-            width="26"
-            x="304"
-            y="272"
-          />
-          <rect
-            fill="url(#oe-lg-md-s)"
-            height="28"
-            opacity=".45"
-            rx="4"
-            width="26"
-            x="362"
-            y="272"
-          />
-          <rect
-            fill="url(#oe-lg-md-s)"
-            height="82"
-            opacity=".55"
-            rx="4"
-            width="34"
-            x="329"
-            y="328"
+          <path
+            d="M32 480 C 150 452, 260 480, 360 452 C 410 438, 450 456, 480 448 V 480 H 32 Z"
+            fill="#2e8b3f"
           />
         </g>
       </svg>
@@ -6235,11 +6114,10 @@ exports[`Visual Regression - Logo > LogoWithText - without version 1`] = `
       class="text-[17px] leading-none font-medium text-content-primary whitespace-nowrap tracking-tight"
       style="font-family: "Plus Jakarta Sans", system-ui, sans-serif; letter-spacing: -0.02em;"
     >
-      Open
       <span
         class="text-oe-blue"
       >
-        Construction
+        Sod Boys
       </span>
     </span>
   </div>
@@ -6255,7 +6133,7 @@ exports[`Visual Regression - NotFoundPage > renders the 404 page with navigation
       class="max-w-md text-center"
     >
       <div
-        class="mb-6 text-9xl font-extrabold bg-gradient-to-r from-oe-blue to-violet-500 bg-clip-text text-transparent select-none animate-fade-in"
+        class="mb-6 text-9xl font-extrabold bg-gradient-to-r from-oe-blue to-oe-purple bg-clip-text text-transparent select-none animate-fade-in"
       >
         404
       </div>

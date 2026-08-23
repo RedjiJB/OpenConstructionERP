@@ -2,14 +2,18 @@
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
 // White-label branding for the sidebar header.
 //
-// Renders the user's company logo / name when they have customised
-// the platform via the edit modal; otherwise renders the default
-// OpenConstructionERP wordmark. Clicking the brand area (or the
-// "Customise" pencil that appears on hover) opens the editor.
+// D-Central FieldOps fork (Task #156): the default (non-customised)
+// state now renders the Sod Boys Ltd wordmark directly, not
+// OpenConstructionERP's own -- this deployment only ever serves Sod
+// Boys, so there is no vendor-default state to fall back to. The
+// customisation editor itself is untouched (still lets an admin swap
+// in yet another logo/name), and its "by OpenConstructionERP"
+// attribution line is left exactly as upstream wrote it -- that line
+// is the real AGPL-3.0 attribution requirement this component exists
+// to satisfy, and it names the actual upstream project truthfully.
 //
 // Layout rules:
-//   * No customisation → full OpenConstructionERP logo+wordmark, as
-//     before (visual parity with v3.0.5).
+//   * No customisation → Sod Boys logo+wordmark (this fork's own default).
 //   * Logo set        → user's logo fills the header width;
 //                       "OpenConstructionERP" subtitle is rendered at
 //                       roughly 1/3 of the original size beneath it
@@ -104,15 +108,9 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
       );
     }
     return (
-      <a
-        href="https://openconstructionerp.com/?utm_source=app"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="hover:opacity-80 transition-opacity"
-        title="OpenConstructionERP"
-      >
+      <div className="pointer-events-none" title="Sod Boys FieldOps">
         <Logo size="sm" />
-      </a>
+      </div>
     );
   }
 
@@ -175,13 +173,7 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
               </span>
             </button>
           ) : (
-            <a
-              href="https://openconstructionerp.com/?utm_source=app"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center gap-1 hover:opacity-80 transition-opacity"
-              title="OpenConstructionERP"
-            >
+            <div className="flex items-center gap-1" title="Sod Boys FieldOps">
               {/* Compact wordmark — 13px text + smaller gap to fit
                   the 248px sidebar minus the 32px edit button without
                   visual crowding. Standard LogoWithText size="xs" used
@@ -194,10 +186,10 @@ export function CustomBranding({ iconified }: CustomBrandingProps) {
                   letterSpacing: '-0.02em',
                 }}
               >
-                Open<span className="text-oe-blue">Construction</span>
-                <span className="text-content-quaternary">ERP</span>
+                <span className="text-oe-blue">Sod Boys</span>{' '}
+                <span className="text-content-quaternary">FieldOps</span>
               </span>
-            </a>
+            </div>
           )}
         </div>
 

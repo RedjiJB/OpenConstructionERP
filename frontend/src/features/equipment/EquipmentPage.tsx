@@ -269,18 +269,6 @@ function HowEquipmentWorks() {
         <span className="flex flex-wrap items-center gap-x-2 gap-y-1">
           <ModLink to="/resources">
             {t('equipment.mod_resources', { defaultValue: 'Resources & Crew' })}
-          </ModLink>{' '}
-          ·{' '}
-          <ModLink to="/schedule">
-            {t('equipment.mod_schedule', { defaultValue: 'Schedule' })}
-          </ModLink>{' '}
-          ·{' '}
-          <ModLink to="/finance">
-            {t('equipment.mod_finance', { defaultValue: 'Finance' })}
-          </ModLink>{' '}
-          ·{' '}
-          <ModLink to="/assets">
-            {t('equipment.mod_assets', { defaultValue: 'Building Assets' })}
           </ModLink>
         </span>
       </div>

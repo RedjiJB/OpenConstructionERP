@@ -15,9 +15,6 @@ import { GlobalUploadIndicator } from '@/shared/ui/GlobalUploadIndicator';
 import { DwgUploadIndicator } from '@/shared/ui/DwgUploadIndicator';
 import { GlobalCatalogueInstallIndicator } from '@/shared/ui/GlobalCatalogueInstallIndicator';
 import { DemoBanner } from '@/shared/ui/DemoBanner';
-import { ReviewPromptCard } from '@/shared/ui/ReviewPromptCard';
-import { FloatingChatButton } from '@/features/erp-chat/FloatingChatButton';
-import { FloatingChatPanel } from '@/features/erp-chat/FloatingChatPanel';
 import {
   DashboardBackdrop,
   backdropVariantForPath,
@@ -28,7 +25,6 @@ import { useIsRTL } from '@/shared/hooks/useIsRTL';
 import { useOfflineSync } from '@/shared/hooks/useOnlineStatus';
 import { usePartnerPackLocale } from '@/shared/hooks/usePartnerPackLocale';
 import { useBrandingStore } from '@/stores/useBrandingStore';
-import { useReviewPromptStore } from '@/stores/useReviewPromptStore';
 
 interface AppLayoutProps {
   title?: string;
@@ -53,26 +49,15 @@ export function AppLayout({ title, children }: AppLayoutProps) {
 
   // When the user has white-labelled the workspace with their own company
   // name, the browser tab follows the same brand as the sidebar so the whole
-  // experience reads as "their" tool. Falls back to OpenConstructionERP.
+  // experience reads as "their" tool. Falls back to Sod Boys FieldOps.
   const brandName = useBrandingStore((s) => (s.companyName.trim() ? s.companyName.trim() : null));
-
-  // Count today towards "distinct days the app was opened". This has to run
-  // from the shell, unconditionally, and NOT from ReviewPromptCard: if the
-  // day were recorded by the card, the counter would only advance on days
-  // the card already rendered and could never reach its own threshold. The
-  // write is idempotent per day, so the per-route remount of AppLayout costs
-  // nothing after the first navigation.
-  const recordActiveDay = useReviewPromptStore((s) => s.recordActiveDay);
-  useEffect(() => {
-    recordActiveDay();
-  }, [recordActiveDay]);
 
   useEffect(() => {
     // Translate the browser-tab title through the same map the on-screen
     // page heading uses, so the tab also follows the active language.
     const key = resolvePageTitleKey(title);
     const translated = title ? (key ? t(key, { defaultValue: title }) : title) : null;
-    const suffix = brandName ?? 'OpenConstructionERP';
+    const suffix = brandName ?? 'Sod Boys FieldOps';
     document.title = translated ? `${translated} | ${suffix}` : suffix;
     // i18n.language in deps so the tab re-translates on a language switch.
   }, [title, t, i18n.language, brandName]);
@@ -183,22 +168,13 @@ export function AppLayout({ title, children }: AppLayoutProps) {
       {/* Floating Recent button — bottom-right corner */}
       <FloatingRecentButton />
 
-      {/* Floating chat — always-visible button + slide-in panel that talks
-          to the erp_chat backend. The button hides itself on /chat (no
-          duplication of the full-page experience) and on auth-bypass routes
-          (/login, /onboarding). The panel is mounted at the layout level so
-          the conversation survives navigation. */}
-      <FloatingChatButton />
-      <FloatingChatPanel />
-
-      {/* Occasional, non-blocking ask for a rating or review. Mounted here
-          rather than at App.tsx top level on purpose: this shell is behind
-          auth, and /login, /register, /forgot-password and /onboarding all
-          render OUTSIDE it, so those surfaces are excluded structurally
-          instead of by a route blocklist that would rot. AppLayout remounts
-          per route, which is harmless because every piece of state the card
-          needs lives in useReviewPromptStore, not in the component. */}
-      <ReviewPromptCard />
+      {/* D-Central FieldOps fork (Task #156): FloatingChatButton/Panel
+          talked to an `erp_chat` AI backend this façade never
+          implements -- there is no AI chat capability anywhere in this
+          domain, so the button would open a permanently-broken panel.
+          ReviewPromptCard asked users to rate/review OpenConstructionERP
+          on G2, which makes no sense for a private internal tool. Both
+          dropped rather than left showing something false. */}
 
       {/* Global onboarding tour (ProductTour) mounts once at App.tsx
           top level — moving it out of here was the fix for

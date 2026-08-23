@@ -201,21 +201,9 @@ function HowPayrollWorks() {
           <span className="font-medium text-content-secondary">
             {t('payroll.flow_pulls', { defaultValue: 'Pulls from:' })}
           </span>{' '}
-          <ModLink to="/field-reports">
-            {t('payroll.mod_field_reports', { defaultValue: 'Field reports' })}
-          </ModLink>{' '}
-          ·{' '}
           <ModLink to="/resources">
             {t('payroll.mod_resources', { defaultValue: 'Resources & Crew' })}
           </ModLink>
-        </span>
-        <span>
-          <span className="font-medium text-content-secondary">
-            {t('payroll.flow_feeds', { defaultValue: 'Feeds:' })}
-          </span>{' '}
-          <ModLink to="/5d">{t('payroll.mod_5d', { defaultValue: '5D Cost' })}</ModLink> ·{' '}
-          <ModLink to="/finance">{t('payroll.mod_finance', { defaultValue: 'Finance' })}</ModLink> ·{' '}
-          <ModLink to="/reports">{t('payroll.mod_reports', { defaultValue: 'Reports' })}</ModLink>
         </span>
       </div>
     </CollapsibleSection>

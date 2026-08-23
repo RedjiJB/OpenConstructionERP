@@ -4,12 +4,11 @@ import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Eye, EyeOff, Mail, Lock, Globe, ChevronDown, X, Github, Users, ArrowUpRight, Pencil,
-  ShieldCheck, Zap, Brain, Info,
-  FileSpreadsheet, CalendarClock, TrendingUp, Boxes, Database,
-  BarChart3, Upload, FileCheck,
-  Box, Ruler, Layers,
-  PenTool, FolderOpen, ClipboardList,
+  Eye, EyeOff, Mail, Lock, Globe, ChevronDown, Users, Pencil,
+  ShieldCheck,
+  FileSpreadsheet, CalendarClock, Boxes, Database,
+  FileCheck,
+  Layers, Truck, Timer,
   Sun, Moon, Monitor,
 } from 'lucide-react';
 import { Button, Input, Logo, LogoWithText, CountryFlag } from '@/shared/ui';
@@ -20,7 +19,6 @@ import { extractErrorMessageFromBody } from '@/shared/lib/api';
 import { isTauri } from '@/shared/lib/desktop';
 import { HEX_PORTRAIT_ASPECT, HEX_PORTRAIT_CLIP } from '@/shared/lib/honeycomb';
 import { APP_VERSION } from '@/shared/lib/version';
-import { AuthBackground } from './AuthBackground';
 import {
   shouldAttemptDesktopBootstrap,
   shouldQueryFirstRun,
@@ -78,7 +76,7 @@ export function LoginPage() {
   const setTokens = useAuthStore((s) => s.setTokens);
   // White-label brand (same localStorage store the in-app sidebar editor
   // writes to). When a tenant has set a logo / company name we show it
-  // on the login card instead of the default OpenConstructionERP wordmark.
+  // on the login card instead of the default Sod Boys wordmark.
   const { mode: brandMode, logoDataUrl: brandLogo, companyName: brandName } =
     useBrandingStore();
   const brandCustomised = brandMode === 'logo' || brandMode === 'text';
@@ -103,18 +101,7 @@ export function LoginPage() {
     () => localStorage.getItem('oe_remember') === '1',
   );
   const [langOpen, setLangOpen] = useState(false);
-  const [showInfo, setShowInfo] = useState(false);
   const [brandOpen, setBrandOpen] = useState(false);
-  const [demoOpen, setDemoOpen] = useState(true);
-  const [demoHint, setDemoHint] = useState(false);
-  const [demoLoading, setDemoLoading] = useState<string | null>(null);
-  // The demo sign-in is shown by DEFAULT and only hidden when the server
-  // explicitly reports demo is off (SEED_DEMO=false, or an admin turned it off
-  // in Settings). Starting true means a probe that fails or races the ~60s
-  // first-boot demo seeding can never leave the block hidden (see the effect
-  // below). This is deliberate: demo access is a headline feature of the open
-  // platform, so it should always be there on a fresh install.
-  const [demoEnabled, setDemoEnabled] = useState<boolean>(true);
   const langRef = useRef<HTMLDivElement>(null);
 
   // Desktop first-run: when running inside the Tauri shell with no stored
@@ -138,39 +125,6 @@ export function LoginPage() {
     setEmail('');
     setPassword('');
     setError('');
-  }, []);
-
-  // Probe whether this server has demo turned OFF (public, no auth). The block
-  // is shown by default (see the state above); this effect only ever HIDES it,
-  // and only when the server explicitly reports `demo_enabled: false` - a
-  // production install with SEED_DEMO=false, or an admin who turned demo off in
-  // Settings. Older servers omit the field, which keeps the block shown. The
-  // very first probe on a fresh install can race the ~60s demo seeding, so a
-  // failed probe is retried a few times and NEVER hides the block on its own.
-  useEffect(() => {
-    let cancelled = false;
-    let attempts = 0;
-    const probe = async (): Promise<void> => {
-      attempts += 1;
-      try {
-        const res = await fetch('/api/v1/auth/first-run', {
-          headers: { Accept: 'application/json' },
-        });
-        if (!res.ok) throw new Error(`first-run probe HTTP ${res.status}`);
-        const status = (await res.json()) as FirstRunStatus;
-        if (!cancelled) setDemoEnabled(status.demo_enabled !== false);
-      } catch {
-        // Transient failure (server still booting / seeding). Retry, but leave
-        // the optimistic default in place so demo never vanishes on a hiccup.
-        if (!cancelled && attempts < 6) {
-          window.setTimeout(() => void probe(), 1500);
-        }
-      }
-    };
-    void probe();
-    return () => {
-      cancelled = true;
-    };
   }, []);
 
   // Desktop auto-bootstrap. Runs once on mount. On ANY failure it silently
@@ -262,46 +216,6 @@ export function LoginPage() {
     }
   };
 
-  const demoAccounts = [
-    { email: 'demo@openconstructionerp.com', name: 'Admin', role: t('auth.demo_role_admin', 'Administrator'), color: 'bg-blue-500', letter: 'A' },
-    { email: 'manager@openconstructionerp.com', name: 'Michael Carter', role: t('auth.demo_role_manager', 'Manager'), color: 'bg-[#7cd0ff]', letter: 'M' },
-  ];
-
-  const handleDemoLogin = async (demoEmail: string) => {
-    setDemoLoading(demoEmail);
-    setError('');
-    setEmail('');
-    setPassword('');
-    try {
-      // Password-less demo sign-in for the seeded showcase accounts. The
-      // backend seeder generates a fresh random password per install (BUG-D01)
-      // that the frontend cannot read, so this dedicated endpoint mints tokens
-      // from the demo email alone. When demo seeding is disabled the server
-      // returns 404 and we surface that message - we never fall back to
-      // registering the account, so a demo click cannot create one in
-      // production. The demo block is also hidden entirely in that config.
-      const res = await fetch('/api/v1/users/auth/demo-login/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: demoEmail }),
-      });
-
-      if (!res.ok) {
-        const data = await res.json().catch(() => null);
-        const parsed = extractErrorMessageFromBody(data);
-        setError(parsed || t('auth.demo_login_failed', 'Demo login failed. Please try again.'));
-        return;
-      }
-      const data = await res.json();
-      setTokens(data.access_token, data.refresh_token, false, demoEmail);
-      navigate(nextPath, { replace: true });
-    } catch {
-      setError(t('auth.connection_error', 'Unable to connect to server. Please try again.'));
-    } finally {
-      setDemoLoading(null);
-    }
-  };
-
   /* Benefits list - reserved for future hero section layout
   const benefits = [
     { icon: HardDrive, color: 'text-emerald-500 bg-emerald-500/10', title: t('login.benefit.local', 'Your data stays on your computer'), desc: t('login.benefit.local_desc', 'No cloud. No third-party servers. Full control.') },
@@ -317,7 +231,6 @@ export function LoginPage() {
   if (bootstrapping) {
     return (
       <div className="relative flex h-screen flex-col items-center justify-center bg-surface-secondary overflow-hidden">
-        <AuthBackground />
         <div className="relative z-10 flex flex-col items-center gap-5 px-6 text-center">
           <Logo size="lg" animate />
           <svg
@@ -350,7 +263,6 @@ export function LoginPage() {
 
   return (
     <div className="relative grid h-screen grid-cols-1 lg:grid-cols-2 bg-surface-secondary overflow-hidden">
-      <AuthBackground />
 
       {/* Local style block - premium glass variant + drifting orb keyframes
           scoped to the login page. Pattern mirrors LoginPageNext.tsx. */}
@@ -511,43 +423,24 @@ export function LoginPage() {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-60" />
               <span className="relative inline-flex rounded-full h-[6px] w-[6px] bg-emerald-500" />
             </span>
-            <span className="text-[11px] font-medium tracking-[0.04em] text-emerald-700 dark:text-emerald-300">Open Source</span>
+            <span className="text-[11px] font-medium tracking-[0.04em] text-emerald-700 dark:text-emerald-300">Sod Boys Ltd</span>
           </span>
         </div>
 
-        {/* Marketing headline - kept as h2 because the form panel below has the
+        {/* Headline - kept as h2 because the form panel below has the
             authoritative h1 (visually hidden, always present in DOM). */}
         <h2 className="text-[32px] xl:text-[36px] font-semibold text-content-primary leading-[1.08] tracking-[-0.025em] animate-stagger-in" style={{ animationDelay: '60ms' }}>
-          {t('login.hero_h_a', { defaultValue: 'The' })}{' '}
-          <span className="bg-gradient-to-r from-oe-blue to-sky-500 bg-clip-text text-transparent">#1</span>{' '}
-          {t('login.hero_h_b', { defaultValue: 'open-source workspace for' })}
+          {t('login.hero_h_a', { defaultValue: 'Field operations,' })}
           <br />
-          <span className="bg-gradient-to-r from-oe-blue to-sky-500 bg-clip-text text-transparent">
-            {t('login.hero_h_c', { defaultValue: 'construction project management' })}
+          <span className="bg-gradient-to-r from-oe-blue to-oe-purple bg-clip-text text-transparent">
+            {t('login.hero_h_c', { defaultValue: 'in one place' })}
           </span>
         </h2>
 
         {/* Subhead */}
         <p className="mt-5 text-[17px] text-content-secondary/70 leading-[1.65] tracking-[-0.008em] max-w-[420px] animate-stagger-in" style={{ animationDelay: '120ms' }}>
-          {t('login.hero_desc', { defaultValue: 'Plan, estimate, schedule, tender - every step of a project on one professional platform.' })}
+          {t('login.hero_desc', { defaultValue: 'Equipment, crew, timeclock, inventory, procurement and payroll — backed by real data, not spreadsheets.' })}
         </p>
-
-        {/* Stats row */}
-        <div className="mt-5 flex items-center gap-5 animate-stagger-in" style={{ animationDelay: '180ms' }}>
-          {[
-            { value: '120K+', label: t('login.stat_costs', { defaultValue: 'cost items' }) },
-            { value: String(SUPPORTED_LANGUAGES.length), label: t('login.stat_langs', { defaultValue: 'languages' }) },
-            { value: '47', label: t('login.stat_regions', { defaultValue: 'countries' }) },
-            { value: '6', label: t('login.stat_cad', { defaultValue: 'CAD formats' }) },
-            { value: '180+', label: t('login.stat_modules', { defaultValue: 'modules' }) },
-            { value: '28', label: t('login.stat_sections', { defaultValue: 'sections' }) },
-          ].map((s) => (
-            <div key={s.label} className="text-center">
-              <div className="text-[22px] font-semibold text-content-primary tracking-tight">{s.value}</div>
-              <div className="text-[11px] text-content-tertiary mt-0.5">{s.label}</div>
-            </div>
-          ))}
-        </div>
 
         {/* Divider */}
         <div className="mt-5 mb-4 h-px bg-gradient-to-r from-content-primary/[0.06] via-content-primary/[0.1] to-transparent animate-stagger-in" style={{ animationDelay: '220ms' }} />
@@ -566,26 +459,18 @@ export function LoginPage() {
               what makes the slanted edges meet exactly. */}
         <div className="relative mt-1 mr-auto h-[280px] w-[560px] max-w-full overflow-hidden animate-stagger-in" style={{ animationDelay: '260ms' }}>
           {([
-            // Top row (y = -75) - 6 cells, offset by 44.
-            { x: -220, y: -76, icon: ShieldCheck,     label: t('login.mod.local',     { defaultValue: 'Local' }) },
-            { x: -132, y: -76, icon: Brain,           label: t('login.mod.ai',       { defaultValue: 'AI' }) },
-            { x:  -44, y: -76, icon: Ruler,           label: t('login.mod.takeoff',  { defaultValue: 'Takeoff' }) },
-            { x:   44, y: -76, icon: PenTool,         label: t('login.mod.cad',      { defaultValue: 'CAD' }) },
-            { x:  132, y: -76, icon: Box,             label: t('login.mod.bim',      { defaultValue: 'BIM' }) },
-            { x:  220, y: -76, icon: TrendingUp,      label: t('login.mod.cost5d',   { defaultValue: '5D' }) },
-            // Mid row (y = 0) - 5 cells aligned on the same axis.
-            { x: -176, y:  0,  icon: Database,        label: t('login.mod.costs',    { defaultValue: 'Costs' }) },
-            { x:  -88, y:  0,  icon: FileSpreadsheet, label: t('common.boq') },
-            { x:    0, y:  0,  icon: Layers,          label: t('login.mod.core',     { defaultValue: 'Workspace' }), accent: true },
-            { x:   88, y:  0,  icon: CalendarClock,   label: t('login.mod.schedule', { defaultValue: 'Schedule' }) },
-            { x:  176, y:  0,  icon: BarChart3,       label: t('login.mod.tender',   { defaultValue: 'Tendering' }) },
-            // Bottom row (y = 75) - 6 cells, offset by 44.
-            { x: -220, y:  76, icon: Zap,             label: t('login.mod.realtime', { defaultValue: 'Realtime' }) },
-            { x: -132, y:  76, icon: Boxes,           label: t('login.mod.resources',{ defaultValue: 'Resources' }) },
-            { x:  -44, y:  76, icon: ClipboardList,   label: t('login.mod.tasks',    { defaultValue: 'Tasks' }) },
-            { x:   44, y:  76, icon: FileCheck,       label: t('login.mod.validate', { defaultValue: 'Validate' }) },
-            { x:  132, y:  76, icon: FolderOpen,      label: t('login.mod.files',    { defaultValue: 'Files' }) },
-            { x:  220, y:  76, icon: Upload,          label: t('login.mod.exports',  { defaultValue: 'Exports' }) },
+            // Top row (y = -75).
+            { x: -220, y: -76, icon: Truck,           label: t('login.mod.equipment',  { defaultValue: 'Equipment' }) },
+            { x:  -44, y: -76, icon: Users,           label: t('login.mod.resources',  { defaultValue: 'Resources' }) },
+            { x:  132, y: -76, icon: CalendarClock,   label: t('login.mod.fieldtime',  { defaultValue: 'Field Time' }) },
+            // Mid row (y = 0).
+            { x: -176, y:  0,  icon: Boxes,           label: t('login.mod.inventory',  { defaultValue: 'Inventory' }) },
+            { x:    0, y:  0,  icon: Layers,          label: t('login.mod.core',       { defaultValue: 'FieldOps' }), accent: true },
+            { x:  176, y:  0,  icon: FileSpreadsheet, label: t('login.mod.procurement',{ defaultValue: 'Procurement' }) },
+            // Bottom row (y = 75).
+            { x: -132, y:  76, icon: Database,        label: t('login.mod.payroll',    { defaultValue: 'Payroll' }) },
+            { x:   44, y:  76, icon: ShieldCheck,     label: t('login.mod.teams',      { defaultValue: 'Teams' }) },
+            { x:  132, y:  76, icon: FileCheck,       label: t('login.mod.notifications', { defaultValue: 'Alerts' }) },
           ] as const).map((cell, idx) => {
             const isAccent = 'accent' in cell && cell.accent === true;
             const Icon = cell.icon;
@@ -644,8 +529,8 @@ export function LoginPage() {
             after the honeycomb. */}
         <div className="mt-2 flex flex-wrap items-start gap-x-5 gap-y-2 animate-stagger-in" style={{ animationDelay: '320ms' }}>
           {[
-            { icon: ShieldCheck, title: t('login.feat_local_title', { defaultValue: 'Your data, your machine' }), desc: t('login.feat_local', { defaultValue: 'Nothing leaves your computer. Full ownership,\nzero cloud dependency.' }) },
-            { icon: Brain,       title: t('login.feat_ai_title',    { defaultValue: 'AI-assisted, human-confirmed' }), desc: t('login.feat_ai',    { defaultValue: 'Smart suggestions with confidence scores. You always have the final say.' }) },
+            { icon: ShieldCheck, title: t('login.feat_local_title', { defaultValue: 'Your data, your servers' }), desc: t('login.feat_local', { defaultValue: 'Self-hosted for Sod Boys Ltd.\nNo third-party data sharing.' }) },
+            { icon: Timer,       title: t('login.feat_ai_title',    { defaultValue: 'Straight from the field' }), desc: t('login.feat_ai',    { defaultValue: 'Timesheets and payroll come from real clock-ins, not spreadsheets.' }) },
           ].map((feat) => {
             const Icon = feat.icon;
             return (
@@ -670,8 +555,6 @@ export function LoginPage() {
           <div className="flex items-center gap-2 text-[11px] text-content-quaternary/60">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" className="opacity-40"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
             <a href="/api/source" target="_blank" rel="noopener noreferrer" className="hover:text-content-tertiary transition-colors">AGPL-3.0</a>
-            <span className="opacity-30">&middot;</span>
-            <a href="https://OpenConstructionERP.com" target="_blank" rel="noopener noreferrer" className="hover:text-content-tertiary transition-colors">OpenConstructionERP.com</a>
           </div>
         </div>
       </div>
@@ -742,7 +625,7 @@ export function LoginPage() {
                     className="text-2xl font-medium text-content-primary whitespace-nowrap"
                     style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.02em' }}
                   >
-                    Open<span className="text-oe-blue">Construction</span><span className="text-content-quaternary">ERP</span>
+                    <span className="text-oe-blue">Sod Boys</span> <span className="text-content-quaternary">FieldOps</span>
                   </span>
                 </div>
               )}
@@ -760,22 +643,22 @@ export function LoginPage() {
               </button>
             </div>
             <p className="mt-2 text-sm text-content-tertiary">
-              {t('login.workspace_tagline', { defaultValue: 'Professional construction project workspace' })}
+              {t('login.workspace_tagline', { defaultValue: 'Field operations dashboard' })}
             </p>
           </div>
 
-          {/* Open-source banner (mobile) */}
+          {/* Brand banner (mobile) */}
           <div className="lg:hidden mb-4 animate-stagger-in" style={{ animationDelay: '100ms' }}>
-            <div className="rounded-xl bg-gradient-to-r from-oe-blue/10 via-violet-500/10 to-emerald-500/10 border border-oe-blue/20 px-4 py-3 text-center">
+            <div className="rounded-xl bg-gradient-to-r from-oe-blue/10 via-oe-purple/10 to-emerald-500/10 border border-oe-blue/20 px-4 py-3 text-center">
               <div className="flex items-center justify-center gap-1.5 mb-1">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
                 </span>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Open Source</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600">Sod Boys Ltd</span>
               </div>
-              <p className="text-sm font-bold bg-gradient-to-r from-oe-blue via-violet-600 to-emerald-600 bg-clip-text text-transparent">
-                {t('login.open_source_badge', { defaultValue: 'The #1 Open-Source Construction ERP' })}
+              <p className="text-sm font-bold bg-gradient-to-r from-oe-blue via-oe-purple to-emerald-600 bg-clip-text text-transparent">
+                {t('login.open_source_badge', { defaultValue: 'Field Operations Dashboard' })}
               </p>
             </div>
           </div>
@@ -854,148 +737,19 @@ export function LoginPage() {
 
           </div>
 
-          {/* Demo Access - shown by default. Hidden only when the server
-              reports demo is off (SEED_DEMO=false, or an admin turned it off in
-              Settings), which flips demoEnabled to false in the effect above. */}
-          {demoEnabled && (
-          <div className="relative mt-3 animate-stagger-in" style={{ animationDelay: '500ms' }}>
-            <div className="login-glass-pro relative rounded-2xl overflow-hidden">
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-x-6 top-0 h-px"
-                style={{
-                  background:
-                    'linear-gradient(90deg, transparent, rgba(255,255,255,0.95), transparent)',
-                }}
-              />
-              <div className="relative flex w-full items-center">
-                <button
-                  type="button"
-                  onClick={() => setDemoOpen(!demoOpen)}
-                  aria-expanded={demoOpen}
-                  className="flex flex-1 items-center justify-center gap-2 px-5 py-2.5 text-sm font-semibold text-oe-blue hover:bg-oe-blue/[0.04] transition-all"
-                >
-                  <Zap size={14} className="text-oe-blue" />
-                  <span>{t('auth.try_demo', { defaultValue: 'Try demo (no signup)' })}</span>
-                  <ChevronDown size={14} className={`text-oe-blue/70 transition-transform duration-200 ${demoOpen ? 'rotate-180' : ''}`} />
-                </button>
-              </div>
+          {/* D-Central FieldOps fork (Task #156): the demo-access panel
+              defaulted `demoEnabled` to `true` and only ever hid itself on
+              an EXPLICIT `demo_enabled: false` response from
+              `/api/v1/auth/first-run` -- deliberate upstream behavior so a
+              transient probe failure could never hide a headline feature
+              of the open-source product. This façade never implements
+              that endpoint at all (permanent 404, not a hiccup), so the
+              panel would show fake `@openconstructionerp.com` demo
+              accounts on this deployment forever. There is no demo-mode
+              concept in this domain -- accounts are admin-provisioned via
+              MCP tools -- so the whole panel is dropped rather than
+              patched to fail closed. */}
 
-              {demoOpen && (
-                <div className="border-t border-border-light/60 px-3 py-2.5 space-y-1.5 animate-stagger-in">
-                  {demoAccounts.map((acct) => (
-                    <button
-                      key={acct.email}
-                      type="button"
-                      onClick={() => handleDemoLogin(acct.email)}
-                      disabled={demoLoading !== null}
-                      className="flex w-full items-center gap-3 rounded-xl border border-border-light/50 dark:border-white/10 bg-surface-secondary/50 dark:bg-white/[0.06] px-3.5 py-2.5 text-left transition-all hover:border-oe-blue/40 hover:bg-oe-blue/[0.05] dark:hover:bg-oe-blue/[0.14] hover:shadow-sm disabled:opacity-50 group"
-                    >
-                      <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${acct.color} text-white text-sm font-bold shadow-sm`}>
-                        {demoLoading === acct.email ? (
-                          <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" /></svg>
-                        ) : (
-                          acct.letter
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="text-[13px] font-semibold text-content-primary">{acct.name}</div>
-                        <div className="text-[11px] text-content-tertiary dark:text-content-secondary truncate">{acct.email} · {acct.role}</div>
-                      </div>
-                      <ChevronDown size={15} className="text-content-quaternary -rotate-90 group-hover:text-oe-blue transition-colors shrink-0" />
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            {/* Info affordance - kept OUTSIDE the overflow-hidden card above so
-                the hint popover is never clipped and always paints on top of the
-                demo accounts and the links below. Hover reveals it; click pins it
-                (touch / keyboard). Anchored to this relative wrapper at a fixed
-                top offset so it stays on the header row whether the demo list is
-                open or closed. */}
-            <div className="group absolute right-2 top-2 z-40">
-              <button
-                type="button"
-                aria-label={t('auth.demo_hint_aria', { defaultValue: 'About the demo sign-in block' })}
-                onClick={() => setDemoHint((v) => !v)}
-                className="flex h-6 w-6 items-center justify-center rounded-full text-oe-blue/50 hover:text-oe-blue hover:bg-oe-blue/[0.08] transition-colors"
-              >
-                <Info size={14} />
-              </button>
-              <div
-                role="tooltip"
-                className={`pointer-events-none absolute right-0 top-full mt-2 w-64 rounded-xl border border-border bg-surface-elevated backdrop-blur-md px-3.5 py-2.5 text-left text-xs leading-relaxed text-content-primary shadow-2xl transition-opacity duration-150 ${demoHint ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
-              >
-                {t('auth.demo_hint', {
-                  defaultValue:
-                    'Optional demo sign-in. It only appears while demo accounts are enabled, so an administrator can turn it off.',
-                })}
-              </div>
-            </div>
-          </div>
-          )}
-
-          {/* GitHub + Community - two primary entry points for the
-              open-source project (replaces the old single "Learn more"
-              link). Premium two-line cards with a tinted icon badge:
-              graphite for the source repo, oe-blue gradient for the
-              community hub. Mirrors the page's login-glass-pro language. */}
-          <div className="mt-4 grid grid-cols-2 gap-3 animate-stagger-in" style={{ animationDelay: '520ms' }}>
-            <a
-              href="https://github.com/datadrivenconstruction/OpenConstructionERP"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${t('login.github', { defaultValue: 'GitHub' })} - ${t('login.github_sub', { defaultValue: 'Source code' })}`}
-              className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-border-light/70 dark:border-white/15 bg-white/75 dark:bg-white/[0.07] backdrop-blur-sm px-3.5 py-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90 dark:hover:bg-white/[0.12] dark:hover:border-white/25 hover:border-content-primary/25 hover:shadow-lg"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-content-primary/[0.06] dark:bg-white/10 text-content-primary transition-colors group-hover:bg-content-primary/10 dark:group-hover:bg-white/15">
-                <Github size={17} strokeWidth={1.9} />
-              </span>
-              <span className="min-w-0 flex-1 leading-tight">
-                <span className="block text-[13px] font-semibold text-content-primary">
-                  {t('login.github', { defaultValue: 'GitHub' })}
-                </span>
-                <span className="block truncate text-[11px] text-content-tertiary dark:text-content-secondary">
-                  {t('login.github_sub', { defaultValue: 'Source code' })}
-                </span>
-              </span>
-              <ArrowUpRight
-                size={15}
-                className="shrink-0 text-content-quaternary dark:text-content-tertiary transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-content-secondary"
-              />
-            </a>
-            <a
-              href="https://t.me/datadrivenconstruction"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label={`${t('login.community', { defaultValue: 'Community' })} - ${t('login.community_sub', { defaultValue: 'Get help & discuss' })}`}
-              className="group relative flex items-center gap-3 overflow-hidden rounded-xl border border-border-light/70 dark:border-white/15 bg-white/75 dark:bg-white/[0.07] backdrop-blur-sm px-3.5 py-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:bg-white/90 dark:hover:bg-white/[0.12] dark:hover:border-white/25 hover:border-content-primary/25 hover:shadow-lg"
-            >
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-content-primary/[0.06] dark:bg-white/10 text-content-primary transition-colors group-hover:bg-content-primary/10 dark:group-hover:bg-white/15">
-                <Users size={17} strokeWidth={1.9} />
-              </span>
-              <span className="min-w-0 flex-1 leading-tight">
-                <span className="block text-[13px] font-semibold text-content-primary">
-                  {t('login.community', { defaultValue: 'Community' })}
-                </span>
-                <span className="block truncate text-[11px] text-content-tertiary dark:text-content-secondary">
-                  {t('login.community_sub', { defaultValue: 'Get help & discuss' })}
-                </span>
-              </span>
-              <ArrowUpRight
-                size={15}
-                className="shrink-0 text-content-quaternary dark:text-content-tertiary transition-all duration-200 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:text-content-secondary"
-              />
-            </a>
-          </div>
-          <div className="lg:hidden mt-2 text-center text-2xs text-content-quaternary">
-            <div className="flex items-center justify-center gap-3">
-              <a href="https://OpenConstructionERP.com" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">OpenConstructionERP.com</a>
-              <span>·</span>
-              <a href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">GitHub</a>
-            </div>
-          </div>
           {/* Running build version - always visible so it's obvious which
               version is live on a fresh open. Matches the Sidebar / About
               treatment (v{APP_VERSION}). */}
@@ -1008,149 +762,6 @@ export function LoginPage() {
       {/* ── White-label branding editor (pre-auth) ── */}
       {brandOpen && <BrandingEditorModal onClose={() => setBrandOpen(false)} />}
 
-      {/* ── About modal ── */}
-      {showInfo && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-lg" onClick={() => setShowInfo(false)} />
-
-          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl border border-border-light bg-surface-elevated shadow-2xl">
-            <button
-              onClick={() => setShowInfo(false)}
-              className="sticky top-0 float-right m-3 p-1.5 rounded-lg text-content-tertiary hover:text-content-primary hover:bg-surface-secondary transition-colors z-10 bg-surface-elevated/80 backdrop-blur-sm"
-            >
-              <X size={18} />
-            </button>
-
-            {/* Header */}
-            <div className="px-6 pt-5 pb-4 border-b border-border-light clear-both">
-              <LogoWithText size="sm" className="mb-3" />
-              <h3 className="text-base font-bold text-content-primary mb-2">
-                {t('about.title', 'Professional construction cost estimation - free and open source')}
-              </h3>
-              <p className="text-[13px] text-content-secondary leading-relaxed">
-                {t('about.intro', 'OpenConstructionERP is a modern platform for construction cost management. It covers the full estimation workflow - from creating a bill of quantities to tendering and bid comparison. Designed for professionals worldwide, it supports international standards and works in 24 languages.')}
-              </p>
-              <p className="mt-2 text-[13px] text-content-secondary leading-relaxed">
-                {t('about.intro2', 'Unlike traditional commercial solutions, OpenConstructionERP runs entirely on your computer. Your project data never leaves your machine - you have full ownership and control. The source code is open and auditable, so you always know exactly what the software does.')}
-              </p>
-            </div>
-
-            {/* What you can do */}
-            <div className="px-6 py-4">
-              <h3 className="text-sm font-semibold text-content-primary mb-3">
-                {t('about.capabilities_title', 'What you can do')}
-              </h3>
-              <div className="grid grid-cols-2 gap-2.5">
-                {[
-                  { icon: FileSpreadsheet, color: 'text-emerald-500 bg-emerald-500/10', title: t('about.cap.boq', 'Bill of Quantities'), desc: t('about.cap.boq_desc', 'Create detailed BOQ with hierarchical sections, positions, assemblies, markups (overhead, profit, VAT), and automatic totals. Works with regional classification systems or your own custom schema.') },
-                  { icon: Database, color: 'text-blue-500 bg-blue-500/10', title: t('about.cap.costs', 'Cost Databases'), desc: t('about.cap.costs_desc', '55,000+ cost items across 48 regional databases worldwide. Add your own rates, import from Excel, or build a custom database from scratch.') },
-                  { icon: CalendarClock, color: 'text-amber-500 bg-amber-500/10', title: t('about.cap.schedule', '4D Scheduling'), desc: t('about.cap.schedule_desc', 'Create project schedules with CPM critical path calculation, interactive Gantt charts, Monte Carlo risk analysis, resource assignment, and auto-generation of activities from your BOQ.') },
-                  { icon: TrendingUp, color: 'text-violet-500 bg-violet-500/10', title: t('about.cap.costmodel', '5D Cost Model'), desc: t('about.cap.costmodel_desc', 'Track budgets over time with Earned Value Management (SPI, CPI), S-curve visualization, cash flow projections, cost snapshots, and what-if scenario modeling for informed decision-making.') },
-                  { icon: Boxes, color: 'text-rose-500 bg-rose-500/10', title: t('about.cap.catalog', 'Resource Catalog'), desc: t('about.cap.catalog_desc', '7,000+ resources - materials, equipment, labor, operators, and utilities. Build reusable assemblies (composite rates) from catalog items and apply them directly to BOQ positions.') },
-                  { icon: BarChart3, color: 'text-cyan-500 bg-cyan-500/10', title: t('about.cap.tendering', 'Tendering & Bids'), desc: t('about.cap.tendering_desc', 'Create tender packages with scope and positions, distribute to subcontractors, collect and compare bids side-by-side in a price mirror, and make award decisions based on data.') },
-                  { icon: Upload, color: 'text-orange-500 bg-orange-500/10', title: t('about.cap.import', 'Import & Export'), desc: t('about.cap.import_desc', 'Full support for GAEB XML (X83), Excel, and CSV import/export. Generate professional PDF reports. Seamlessly integrate with your existing tools and workflows.') },
-                  { icon: FileCheck, color: 'text-teal-500 bg-teal-500/10', title: t('about.cap.validation', 'Quality Validation'), desc: t('about.cap.validation_desc', 'Built-in quality engine automatically checks for missing quantities, zero prices, duplicate positions, classification compliance, and rate anomalies - with a traffic-light dashboard.') },
-                ].map((cap, idx) => {
-                  const Icon = cap.icon;
-                  return (
-                    <div key={idx} className="rounded-lg border border-border-light/60 bg-surface-secondary/50 px-3 py-2.5">
-                      <div className="flex items-center gap-2 mb-1">
-                        <div className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-md ${cap.color}`}>
-                          <Icon size={13} />
-                        </div>
-                        <span className="text-xs font-semibold text-content-primary">{cap.title}</span>
-                      </div>
-                      <p className="text-2xs text-content-tertiary leading-relaxed pl-8">{cap.desc}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-
-            {/* Why open source */}
-            <div className="px-6 py-4 border-t border-border-light">
-              <h3 className="text-sm font-semibold text-content-primary mb-2">
-                {t('about.why_title', 'Why open source matters')}
-              </h3>
-              <div className="space-y-2 text-[13px] text-content-secondary leading-relaxed">
-                <p>{t('about.why_1', 'Construction cost data is one of the most valuable assets a company owns. With proprietary software, your data is often locked inside formats you cannot control. If the vendor raises prices, changes terms, or discontinues the product - you may lose access to years of work.')}</p>
-                <p>{t('about.why_2', 'OpenConstructionERP takes a different approach. Your data is stored in open formats (SQLite, JSON, CSV) on your own hardware. You can export everything at any time. The source code is publicly auditable under AGPL-3.0, so there are no hidden data transfers, no telemetry, and no surprises.')}</p>
-                <p>{t('about.why_3', 'The platform is modular - install only what you need. Community modules extend functionality without bloating the core. And because it runs locally, it works offline and performs fast even with large projects.')}</p>
-              </div>
-            </div>
-
-            {/* Who is it for */}
-            <div className="px-6 py-4 border-t border-border-light">
-              <h3 className="text-sm font-semibold text-content-primary mb-2">
-                {t('about.who_title', 'Who is it for')}
-              </h3>
-              <p className="text-[13px] text-content-secondary leading-relaxed mb-3">
-                {t('about.who_desc', 'OpenConstructionERP is designed for anyone involved in construction cost management - whether you work on residential projects or large-scale infrastructure, in-house or as a consultant.')}
-              </p>
-              <div className="flex flex-wrap gap-1.5">
-                {[
-                  t('about.who.estimators', 'Cost estimators'),
-                  t('about.who.qsurveyor', 'Quantity surveyors'),
-                  t('about.who.pm', 'Project managers'),
-                  t('about.who.contractors', 'General contractors'),
-                  t('about.who.subs', 'Subcontractors'),
-                  t('about.who.architects', 'Architects & engineers'),
-                  t('about.who.developers', 'Real estate developers'),
-                  t('about.who.public', 'Public sector & municipalities'),
-                  t('about.who.students', 'Students & educators'),
-                  t('about.who.freelancers', 'Freelance consultants'),
-                ].map((role) => (
-                  <span key={role} className="inline-flex items-center rounded-full bg-oe-blue/10 px-2.5 py-1 text-2xs font-medium text-oe-blue">
-                    {role}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            {/* Key facts */}
-            <div className="px-6 py-4 border-t border-border-light">
-              <h3 className="text-sm font-semibold text-content-primary mb-3">
-                {t('about.numbers_title', 'Platform in numbers')}
-              </h3>
-              <div className="grid grid-cols-4 gap-3 text-center">
-                {[
-                  { value: '120,441', label: t('about.stat.costs', 'Cost items') },
-                  { value: '48', label: t('about.stat.regions', 'Regional databases') },
-                  { value: String(SUPPORTED_LANGUAGES.length), label: t('about.stat.languages', 'Languages') },
-                  { value: '100%', label: t('about.stat.free', 'Free & open source') },
-                ].map((stat) => (
-                  <div key={stat.label} className="rounded-lg bg-surface-secondary/50 py-2.5">
-                    <div className="text-lg font-bold text-oe-blue">{stat.value}</div>
-                    <div className="text-2xs text-content-tertiary">{stat.label}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* AI note */}
-            <div className="px-6 py-4 border-t border-border-light">
-              <h3 className="text-sm font-semibold text-content-primary mb-2">
-                {t('about.ai_title', 'About AI features')}
-              </h3>
-              <p className="text-[13px] text-content-secondary leading-relaxed">
-                {t('about.ai_desc', 'OpenConstructionERP includes optional AI-powered tools - quick estimation from text descriptions, smart cost suggestions, and BOQ chat assistant. These features require an API key from a provider of your choice (Anthropic, OpenAI, Google). AI is always opt-in: it only activates when you configure it, and you decide what data to send. Without an API key, all other features work fully offline.')}
-              </p>
-            </div>
-
-            {/* Footer */}
-            <div className="px-6 py-4 border-t border-border-light flex items-center justify-between">
-              <div className="flex items-center gap-3 text-2xs text-content-quaternary">
-                <a href="/api/source" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">AGPL-3.0</a>
-                <a href="https://OpenConstructionERP.com" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">OpenConstructionERP.com</a>
-                <a href="https://github.com/datadrivenconstruction/OpenConstructionERP" target="_blank" rel="noopener noreferrer" className="hover:text-content-secondary transition-colors">GitHub</a>
-              </div>
-              <Button variant="primary" size="sm" onClick={() => setShowInfo(false)}>
-                {t('about.close', 'Got it')}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

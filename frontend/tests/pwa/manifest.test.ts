@@ -23,14 +23,14 @@ describe.skipIf(!hasBuild)('PWA manifest', () => {
   const manifest = JSON.parse(raw) as Record<string, unknown>;
 
   it('has the required identity fields', () => {
-    expect(manifest.name).toBe('OpenConstructionERP');
-    expect(manifest.short_name).toBe('OCERP');
+    expect(manifest.name).toBe('Sod Boys FieldOps');
+    expect(manifest.short_name).toBe('FieldOps');
     expect(typeof manifest.description).toBe('string');
   });
 
-  it('sets the OCE theme palette', () => {
-    expect(manifest.theme_color).toBe('#0284c7');
-    expect(manifest.background_color).toBe('#f7fbff');
+  it('sets the Sod Boys theme palette', () => {
+    expect(manifest.theme_color).toBe('#2e8b3f');
+    expect(manifest.background_color).toBe('#eef7f0');
   });
 
   it('declares display=standalone and the root scope', () => {
@@ -64,11 +64,11 @@ describe.skipIf(!hasBuild)('PWA manifest', () => {
 // would still pass if every check were skipConditioned.  Verify the
 // vite config string contains the manifest name.
 describe('PWA plugin configuration', () => {
-  it('vite.config.ts still wires VitePWA with the OCERP manifest', () => {
+  it('vite.config.ts still wires VitePWA with the Sod Boys FieldOps manifest', () => {
     const config = readFileSync(resolve(__dirname, '..', '..', 'vite.config.ts'), 'utf-8');
     expect(config).toContain("VitePWA");
-    expect(config).toContain("'OpenConstructionERP'");
-    expect(config).toContain("'OCERP'");
-    expect(config).toContain("'#0284c7'");
+    expect(config).toContain("'Sod Boys FieldOps'");
+    expect(config).toContain("'FieldOps'");
+    expect(config).toContain("'#2e8b3f'");
   });
 });

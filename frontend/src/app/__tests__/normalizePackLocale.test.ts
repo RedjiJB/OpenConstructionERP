@@ -1,9 +1,14 @@
 // DDC-CWICR-OE: DataDrivenConstruction · OpenConstructionERP
 // Copyright (c) 2026 Artem Boiko / DataDrivenConstruction
-// OpenConstructionERP — DataDrivenConstruction (DDC)
 // Tests for normalizePackLocale: maps a partner pack's BCP-47 default_locale to
 // a supported base UI language, so an active pack forces the right language
-// (batimatech-ca -> fr) and never an unsupported one.
+// and never an unsupported one.
+//
+// D-Central FieldOps fork (Task #156): SUPPORTED_LANGUAGES was trimmed from
+// ~40 locales to just `en`/`fr` (see src/app/i18n.ts). Every fixture below
+// that used to name a now-unshipped locale (de, en-US, es-MX, pt-BR, es-CL,
+// es-CO, pt, ar) is updated to expect the documented fallback: a locale this
+// fork does not ship at all returns 'en'.
 import { describe, expect, it } from 'vitest';
 
 import { normalizePackLocale } from '../i18n';
@@ -16,32 +21,32 @@ describe('normalizePackLocale', () => {
     expect(normalizePackLocale('en-NZ')).toBe('en'); // nzs
   });
 
-  it('keeps the region when the UI ships it, because the pack asked for it', () => {
-    // A pack that names a region has named it deliberately. Stripping en-US left
-    // commercial-denver asking for American English and being handed the British
-    // strings, which is the one thing the locale exists to prevent.
-    expect(normalizePackLocale('en-US')).toBe('en-US'); // commercial-denver, us-costdata
-    expect(normalizePackLocale('es-MX')).toBe('es-MX');
-    expect(normalizePackLocale('pt-BR')).toBe('pt-BR');
-    expect(normalizePackLocale('es-CL')).toBe('es-CL');
-    expect(normalizePackLocale('es-CO')).toBe('es-CO');
+  it('falls back to English for a regional variant this fork does not ship', () => {
+    // Upstream shipped en-US/es-MX/pt-BR/es-CL/es-CO as real regional
+    // bundles; this fork ships only en/fr, so all of these now resolve
+    // through the same "unsupported locale" path as a locale the UI never
+    // heard of at all.
+    expect(normalizePackLocale('en-US')).toBe('en');
+    expect(normalizePackLocale('es-MX')).toBe('en');
+    expect(normalizePackLocale('pt-BR')).toBe('en');
+    expect(normalizePackLocale('es-CL')).toBe('en');
+    expect(normalizePackLocale('es-CO')).toBe('en');
   });
 
-  it('passes through base codes the UI ships', () => {
-    expect(normalizePackLocale('de')).toBe('de'); // bimhessen-de, doker-formwork
-    expect(normalizePackLocale('pt')).toBe('pt'); // brazil-sinapi
-    expect(normalizePackLocale('ar')).toBe('ar'); // saudi-vision2030 (RTL)
-    expect(normalizePackLocale('en')).toBe('en'); // india-cpwd, modular-prefab
+  it('passes through base codes the UI ships, falls back for ones it does not', () => {
+    expect(normalizePackLocale('fr')).toBe('fr');
+    expect(normalizePackLocale('en')).toBe('en');
+    expect(normalizePackLocale('de')).toBe('en'); // not shipped in this fork
+    expect(normalizePackLocale('pt')).toBe('en'); // not shipped in this fork
+    expect(normalizePackLocale('ar')).toBe('en'); // not shipped in this fork
   });
 
   it('is case-insensitive and trims', () => {
     expect(normalizePackLocale('FR-ca')).toBe('fr');
-    expect(normalizePackLocale(' de ')).toBe('de');
-    // A manifest is free to write the region in any case; i18next writes it in
-    // one, and that is the one the resource bundle is registered under.
-    expect(normalizePackLocale('en-us')).toBe('en-US');
-    expect(normalizePackLocale('EN-US')).toBe('en-US');
-    expect(normalizePackLocale(' en-Us ')).toBe('en-US');
+    expect(normalizePackLocale(' fr ')).toBe('fr');
+    expect(normalizePackLocale(' de ')).toBe('en'); // not shipped in this fork
+    expect(normalizePackLocale('en-us')).toBe('en');
+    expect(normalizePackLocale('EN-US')).toBe('en');
   });
 
   it('falls back to English for unsupported or empty locales', () => {
