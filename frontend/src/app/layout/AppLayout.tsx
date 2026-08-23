@@ -6,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 import clsx from 'clsx';
 import { useTranslation } from 'react-i18next';
 import { Sidebar, FloatingRecentButton } from './Sidebar';
+import { FloatingChatButton } from '@/features/chat/FloatingChatButton';
 import { Header, resolvePageTitleKey } from './Header';
 import { DesktopToolbar } from './DesktopToolbar';
 import { FeedbackDialog } from '@/shared/ui';
@@ -24,7 +25,6 @@ import { useSwipeGesture, useEdgeSwipe } from '@/shared/hooks/useSwipeGesture';
 import { useIsRTL } from '@/shared/hooks/useIsRTL';
 import { useOfflineSync } from '@/shared/hooks/useOnlineStatus';
 import { usePartnerPackLocale } from '@/shared/hooks/usePartnerPackLocale';
-import { useBrandingStore } from '@/stores/useBrandingStore';
 
 interface AppLayoutProps {
   title?: string;
@@ -47,20 +47,14 @@ export function AppLayout({ title, children }: AppLayoutProps) {
   // dialog reverts to English.
   usePartnerPackLocale();
 
-  // When the user has white-labelled the workspace with their own company
-  // name, the browser tab follows the same brand as the sidebar so the whole
-  // experience reads as "their" tool. Falls back to Sod Boys FieldOps.
-  const brandName = useBrandingStore((s) => (s.companyName.trim() ? s.companyName.trim() : null));
-
   useEffect(() => {
     // Translate the browser-tab title through the same map the on-screen
     // page heading uses, so the tab also follows the active language.
     const key = resolvePageTitleKey(title);
     const translated = title ? (key ? t(key, { defaultValue: title }) : title) : null;
-    const suffix = brandName ?? 'Sod Boys FieldOps';
-    document.title = translated ? `${translated} | ${suffix}` : suffix;
+    document.title = translated ? `${translated} | Sod Boys FieldOps` : 'Sod Boys FieldOps';
     // i18n.language in deps so the tab re-translates on a language switch.
-  }, [title, t, i18n.language, brandName]);
+  }, [title, t, i18n.language]);
 
   // Lock body scroll when mobile sidebar is open
   useEffect(() => {
@@ -168,13 +162,19 @@ export function AppLayout({ title, children }: AppLayoutProps) {
       {/* Floating Recent button — bottom-right corner */}
       <FloatingRecentButton />
 
-      {/* D-Central FieldOps fork (Task #156): FloatingChatButton/Panel
+      {/* D-Central FieldOps fork: the vendored FloatingChatButton/Panel
           talked to an `erp_chat` AI backend this façade never
-          implements -- there is no AI chat capability anywhere in this
-          domain, so the button would open a permanently-broken panel.
+          implements, so it was dropped during the pruning pass.
+          Replaced here with a real one: a purpose-built, read-only
+          chat assistant (src/domain/chat.ts) backed by an actual LLM
+          (DeepSeek/Anthropic) and this backend's own domain data --
+          see docs/ARCHITECTURE.md's chat status entry. Positioned
+          bottom-4 right-24 so it never stacks under FloatingRecentButton
+          (bottom-24 end-4) or FloatingQueuePanel (bottom-4 right-4).
           ReviewPromptCard asked users to rate/review OpenConstructionERP
-          on G2, which makes no sense for a private internal tool. Both
-          dropped rather than left showing something false. */}
+          on G2, which makes no sense for a private internal tool --
+          still dropped, no replacement needed. */}
+      <FloatingChatButton />
 
       {/* Global onboarding tour (ProductTour) mounts once at App.tsx
           top level — moving it out of here was the fix for

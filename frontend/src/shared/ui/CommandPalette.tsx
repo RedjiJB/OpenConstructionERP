@@ -14,6 +14,7 @@ import {
   CalendarDays,
   ShieldCheck,
   Package,
+  Map as MapIcon,
   CornerDownLeft,
   Users,
   HelpCircle,
@@ -135,6 +136,7 @@ const PAGE_RESULTS: SearchResult[] = [
   { id: 'page-procurement', type: 'page', labelKey: 'procurement.title', icon: Package, path: '/procurement' },
   { id: 'page-payroll', type: 'page', labelKey: 'nav.payroll', icon: Wallet, path: '/payroll' },
   { id: 'page-teams', type: 'page', labelKey: 'teams.title', icon: ShieldCheck, path: '/teams' },
+  { id: 'page-map', type: 'page', labelKey: 'nav.map', icon: MapIcon, path: '/map' },
 ];
 
 /* ── Recent items (stored in localStorage) ─────────────────────────────── */

@@ -33,7 +33,6 @@ import { useGlobalSearchStore } from '@/stores/useGlobalSearchStore';
 import { FloatingQueuePanel } from './layout/FloatingQueuePanel';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useThemeStore } from '@/stores/useThemeStore';
-import { useBrandingStore } from '@/stores/useBrandingStore';
 import { usePreferencesStore } from '@/stores/usePreferencesStore';
 import { hydrateInfoBlocksFromServer } from '@/stores/useInfoBlockPrefsStore';
 import { useProjectContextStore } from '@/stores/useProjectContextStore';
@@ -68,6 +67,7 @@ const ProcurementPage = lazy(() =>
 );
 const PayrollPage = lazy(() => import('@/features/payroll/PayrollPage'));
 const TeamsPage = lazy(() => import('@/features/teams'));
+const MapPage = lazy(() => import('@/features/map/MapPage'));
 
 // This backend has no Projects module, but several kept pages
 // (site-inventory, procurement, payroll, teams, field-time) are gated
@@ -295,10 +295,7 @@ export default function App() {
     }
   }, [isAuthenticated]);
 
-  // Pull the workspace white-label brand from the server so it follows the
-  // user to any browser. Public endpoint, best-effort.
   useEffect(() => {
-    void useBrandingStore.getState().hydrateFromServer();
     if (isAuthenticated) {
       void usePreferencesStore.getState().hydrateFromServer();
     }
@@ -334,6 +331,7 @@ export default function App() {
           <Route path="/procurement" element={<P title="Procurement"><ProcurementPage /></P>} />
           <Route path="/payroll" element={<P title="Payroll"><PayrollPage /></P>} />
           <Route path="/teams" element={<P title="Teams and Visibility"><TeamsPage /></P>} />
+          <Route path="/map" element={<P title="Map"><MapPage /></P>} />
 
           {/* Plugin module routes — lazy-loaded, empty registry today */}
           {moduleRoutes}

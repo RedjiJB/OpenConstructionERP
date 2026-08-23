@@ -694,15 +694,25 @@ function AssetTable({
                   {r.status}
                 </Badge>
               </td>
-              <td className="px-4 py-2 text-xs text-content-secondary">
+              <td className="px-4 py-2 text-xs text-content-secondary max-w-[220px]">
                 {r.location_lat !== null &&
                 r.location_lng !== null &&
                 r.location_lat !== undefined &&
                 r.location_lng !== undefined ? (
-                  <span className="inline-flex items-center gap-1">
-                    <MapPin size={11} className="text-content-tertiary" />
-                    {fmtFixed(r.location_lat, 2)}, {fmtFixed(r.location_lng, 2)}
-                  </span>
+                  <div className="flex flex-col gap-0.5">
+                    <span className="inline-flex items-center gap-1">
+                      <MapPin size={11} className="shrink-0 text-content-tertiary" />
+                      {fmtFixed(r.location_lat, 2)}, {fmtFixed(r.location_lng, 2)}
+                    </span>
+                    {/* Reverse-geocoded address (Nominatim). Not part of the
+                        Equipment contract upstream ships -- the façade rides
+                        it in metadata rather than a field this type never had. */}
+                    {typeof r.metadata.address === 'string' && r.metadata.address && (
+                      <span className="truncate text-content-tertiary" title={r.metadata.address}>
+                        {r.metadata.address}
+                      </span>
+                    )}
+                  </div>
                 ) : (
                   '—'
                 )}

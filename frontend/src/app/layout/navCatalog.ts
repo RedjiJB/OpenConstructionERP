@@ -24,6 +24,7 @@ import {
   Package,
   Wallet,
   ShieldCheck,
+  Map,
 } from 'lucide-react';
 
 export interface NavItem {
@@ -81,6 +82,7 @@ export const navGroups: NavGroup[] = [
       { labelKey: 'procurement.title', to: '/procurement', icon: Package },
       { labelKey: 'nav.payroll', to: '/payroll', icon: Wallet },
       { labelKey: 'teams.title', defaultLabel: 'Teams and visibility', to: '/teams', icon: ShieldCheck },
+      { labelKey: 'nav.map', defaultLabel: 'Map', to: '/map', icon: Map },
     ],
   },
 ];

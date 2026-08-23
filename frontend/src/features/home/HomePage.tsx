@@ -1,4 +1,4 @@
-// D-Central FieldOps — custom landing page.
+// Sod Boys Field Ops — custom landing page.
 //
 // Task #156's frontend-pruning pass replaces the vendored DashboardPage
 // here rather than adapting it: DashboardPage is built around a
@@ -9,7 +9,7 @@
 // exactly the 8 modules this façade actually backs.
 import { Link } from 'react-router-dom';
 import type { LucideIcon } from 'lucide-react';
-import { Bell, Package, Timer, Truck, Users, Wallet, Warehouse, ShieldCheck } from 'lucide-react';
+import { Bell, Package, Timer, Truck, Users, Wallet, Warehouse, ShieldCheck, Map } from 'lucide-react';
 import { useAuthStore } from '@/stores/useAuthStore';
 
 interface ModuleCard {
@@ -27,6 +27,7 @@ const MODULES: ModuleCard[] = [
   { to: '/procurement', icon: Package, title: 'Procurement', description: 'Purchase orders, from draft to fulfilled.' },
   { to: '/payroll', icon: Wallet, title: 'Payroll', description: "This period's hours and pay, reconciled live." },
   { to: '/teams', icon: ShieldCheck, title: 'Teams and visibility', description: 'The crew, grouped.' },
+  { to: '/map', icon: Map, title: 'Map', description: 'Crew and equipment, plotted from logged locations.' },
   { to: '/notifications', icon: Bell, title: 'Notifications', description: 'Alerts raised by the exceptions engine.' },
 ];
 
@@ -41,7 +42,7 @@ export default function HomePage() {
           Welcome back, {greetingName}
         </h1>
         <p className="mt-1 text-sm text-content-secondary">
-          D-Central FieldOps — the modules below are backed by real crew, equipment and timeclock data.
+          Sod Boys Field Ops — the modules below are backed by real crew, equipment and timeclock data.
         </p>
       </div>
 

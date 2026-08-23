@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useLocation } from 'react-router-dom';
 import {
-  Eye, EyeOff, Mail, Lock, Globe, ChevronDown, Users, Pencil,
+  Eye, EyeOff, Mail, Lock, Globe, ChevronDown, Users,
   ShieldCheck,
   FileSpreadsheet, CalendarClock, Boxes, Database,
   FileCheck,
@@ -13,8 +13,6 @@ import {
 } from 'lucide-react';
 import { Button, Input, Logo, CountryFlag } from '@/shared/ui';
 import { useAuthStore } from '@/stores/useAuthStore';
-import { useBrandingStore } from '@/stores/useBrandingStore';
-import { BrandingEditorModal } from '@/app/layout/CustomBranding';
 import { extractErrorMessageFromBody } from '@/shared/lib/api';
 import { isTauri } from '@/shared/lib/desktop';
 import { HEX_PORTRAIT_ASPECT, HEX_PORTRAIT_CLIP } from '@/shared/lib/honeycomb';
@@ -74,19 +72,6 @@ export function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const setTokens = useAuthStore((s) => s.setTokens);
-  // White-label brand (same localStorage store the in-app sidebar editor
-  // writes to). When a tenant has set a logo / company name we show it
-  // on the login card instead of the default Sod Boys wordmark.
-  const { mode: brandMode, logoDataUrl: brandLogo, companyName: brandName } =
-    useBrandingStore();
-  const brandCustomised = brandMode === 'logo' || brandMode === 'text';
-  // Pull the workspace brand from the server so an invited user sees it on this
-  // very first (pre-auth) screen, not just the browser that set it (issue #272).
-  // Public endpoint, best-effort: the card paints instantly from localStorage
-  // and this reconciles to whatever the workspace admin saved.
-  useEffect(() => {
-    void useBrandingStore.getState().hydrateFromServer();
-  }, []);
   // `?next=/path` lets guarded routes send the user back to where they wanted
   // to go after login. Falls back to `/` for direct visits. Shared with the
   // authenticated-route guard (AuthedHome) so a redirect race between the two
@@ -101,7 +86,6 @@ export function LoginPage() {
     () => localStorage.getItem('oe_remember') === '1',
   );
   const [langOpen, setLangOpen] = useState(false);
-  const [brandOpen, setBrandOpen] = useState(false);
   const langRef = useRef<HTMLDivElement>(null);
 
   // Desktop first-run: when running inside the Tauri shell with no stored
@@ -165,6 +149,7 @@ export function LoginPage() {
         // Persist through the existing auth store path with remember=true so the
         // desktop owner stays signed in across launches.
         setTokens(data.access_token, data.refresh_token, true, data.user?.email);
+        void useAuthStore.getState().syncRoleFromServer();
         navigate(status.onboarding_completed === true ? '/dashboard' : '/onboarding', {
           replace: true,
         });
@@ -208,6 +193,15 @@ export function LoginPage() {
       }
       const data = await res.json();
       setTokens(data.access_token, data.refresh_token, rememberMe, email);
+      // setTokens() clears any cached display name from a previous session
+      // (so a different account's name can't briefly leak into the
+      // greeting), but nothing else re-populates it: the module-level
+      // syncRoleFromServer() call in App.tsx already ran once at page load,
+      // before this token existed, and no-ops without one. Without this,
+      // the name stays wiped until the next full page reload -- fetch it
+      // now so the greeting shows the real name on the very first paint
+      // after login instead of the "there" fallback.
+      void useAuthStore.getState().syncRoleFromServer();
       navigate(nextPath, { replace: true });
     } catch {
       setError(t('auth.connection_error', 'Unable to connect to server. Please try again.'));
@@ -587,60 +581,15 @@ export function LoginPage() {
                 pinned to the far right edge which made the brand block
                 look off-centre relative to the form below). */}
             <div className="flex items-center gap-2">
-              {brandCustomised ? (
-                <div className="flex flex-col items-center">
-                  {brandMode === 'logo' && brandLogo ? (
-                    <img
-                      src={brandLogo}
-                      alt={brandName || 'Custom logo'}
-                      className="block max-h-16 w-auto max-w-full object-contain"
-                      draggable={false}
-                    />
-                  ) : (
-                    <span
-                      className="block max-w-full truncate text-center text-3xl font-extrabold text-content-primary leading-none"
-                      style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.02em' }}
-                      title={brandName}
-                    >
-                      {brandName}
-                    </span>
-                  )}
-                  {/* "by OpenConstructionERP" - subordinate attribution that
-                      stays visible (AGPL-3.0). Mirrors CustomBranding.tsx. */}
-                  <span
-                    className="mt-2 block text-[11px] leading-none text-content-tertiary"
-                    style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '0.02em' }}
-                  >
-                    by{' '}
-                    <span className="font-semibold tracking-tight">
-                      Open<span className="text-oe-blue/80">Construction</span>
-                      <span className="text-content-quaternary">ERP</span>
-                    </span>
-                  </span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-2.5">
-                  <Logo size="md" animate />
-                  <span
-                    className="text-2xl font-medium text-content-primary whitespace-nowrap"
-                    style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.02em' }}
-                  >
-                    <span className="text-oe-blue">Sod Boys</span> <span className="text-content-quaternary">FieldOps</span>
-                  </span>
-                </div>
-              )}
-              {/* White-label trigger - same editor as the in-app sidebar
-                  brand control, available pre-auth so a tenant can put
-                  their own logo on the sign-in screen. */}
-              <button
-                type="button"
-                onClick={() => setBrandOpen(true)}
-                className="inline-flex h-7 w-7 items-center justify-center rounded-lg border border-border-light bg-surface-elevated/60 text-content-tertiary backdrop-blur-sm transition-colors hover:border-oe-blue/40 hover:bg-oe-blue/5 hover:text-oe-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-oe-blue/40"
-                aria-label={t('login.brand_edit', { defaultValue: 'Customize logo' })}
-                title={t('login.brand_edit', { defaultValue: 'Customize logo' })}
-              >
-                <Pencil size={13} strokeWidth={2.25} />
-              </button>
+              <div className="flex items-center gap-2.5">
+                <Logo size="md" animate />
+                <span
+                  className="text-2xl font-medium text-content-primary whitespace-nowrap"
+                  style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif", letterSpacing: '-0.02em' }}
+                >
+                  <span className="text-oe-blue">Sod Boys</span> <span className="text-content-quaternary">FieldOps</span>
+                </span>
+              </div>
             </div>
             <p className="mt-2 text-sm text-content-tertiary">
               {t('login.workspace_tagline', { defaultValue: 'Field operations dashboard' })}
@@ -760,7 +709,6 @@ export function LoginPage() {
       </div>
 
       {/* ── White-label branding editor (pre-auth) ── */}
-      {brandOpen && <BrandingEditorModal onClose={() => setBrandOpen(false)} />}
 
     </div>
   );
