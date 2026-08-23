@@ -11,7 +11,7 @@ import {
   Layers, Truck, Timer,
   Sun, Moon, Monitor,
 } from 'lucide-react';
-import { Button, Input, Logo, LogoWithText, CountryFlag } from '@/shared/ui';
+import { Button, Input, Logo, CountryFlag } from '@/shared/ui';
 import { useAuthStore } from '@/stores/useAuthStore';
 import { useBrandingStore } from '@/stores/useBrandingStore';
 import { BrandingEditorModal } from '@/app/layout/CustomBranding';

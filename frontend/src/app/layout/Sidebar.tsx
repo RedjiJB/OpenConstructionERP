@@ -10,7 +10,6 @@ import {
   FolderOpen,
   Table2,
   CalendarDays,
-  Settings,
   ChevronDown,
   ChevronRight,
   X,

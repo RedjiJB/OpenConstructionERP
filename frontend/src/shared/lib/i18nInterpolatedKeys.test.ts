@@ -164,7 +164,8 @@ describe('#200 counted keys carry every plural form their own language uses', ()
     // see the comment beside SUPPORTED_LANGUAGES for why the files stay.
     const fileCodes = new Set(localeFiles.map(([code]) => code));
     for (const code of declaredCodes) {
-      expect(fileCodes.has(code), `declared language '${code}' has no locale file on disk`).toBe(true);
+      expect(code, 'regex capture group must have matched').toBeTruthy();
+      expect(fileCodes.has(code!), `declared language '${code}' has no locale file on disk`).toBe(true);
     }
   });
 
