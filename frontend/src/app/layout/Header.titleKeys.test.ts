@@ -49,43 +49,16 @@ import { isModuleI18nKey } from '@/modules/_i18n';
  * which is invisible to an English reviewer and visible to most other readers:
  * 16 of these 18 render differently in at least one shipped locale.
  */
+// D-Central FieldOps fork (Task #156, frontend-pruning pass): App.tsx now
+// mounts only the 8 façade-backed modules plus auth/landing routes (see
+// docs/ARCHITECTURE.md's Task #156 status entries), so every baseline
+// entry for a pruned route was deleted (the test itself demands this —
+// "no route by that name has both a top bar key and a page heading any
+// more"). Only the two kept routes that still carry the pre-existing
+// upstream split survive; `/projects/:projectId/payroll` was itself
+// pruned (this fork has no Projects module), so that variant is gone too.
 const SPLIT_BASELINE: Record<string, [string, string]> = {
-  // Two different names in English, so any reader can see both and pick.
-  '/bim': ['nav.bim_viewer', 'bim.landing_hero_title'],
-  '/bim/:modelId': ['nav.bim_viewer', 'bim.landing_hero_title'],
-  '/projects/:projectId/bim': ['nav.bim_viewer', 'bim.landing_hero_title'],
-  '/projects/:projectId/bim/:modelId': ['nav.bim_viewer', 'bim.landing_hero_title'],
-  '/coordination': ['nav.coordination_hub', 'coordination.title'],
-  '/assets': ['nav.assets', 'assets.title'],
-  '/templates': ['nav.templates', 'boq.templates'],
-  '/deadlines': ['deadlines.title', 'deadlines.register_title'],
-  '/issues': ['nav.issues', 'issues.title'],
-  '/credentials': ['nav.credentials', 'credentials.page_title'],
-  '/projects/:projectId/credentials': ['nav.credentials', 'credentials.page_title'],
-  '/module-builder': ['nav.module_builder', 'module_builder.title'],
-  '/users': ['sidebar.admin_grid.users', 'users.management'],
-  '/admin/audit-log': ['sidebar.admin_grid.audit', 'admin.audit_log_title'],
-
-  // One name in English, two keys. `/clash` and `/progress` agree in all 42
-  // locales today and are the cheapest to collapse; the rest already drift.
-  '/clash': ['nav.clash_detection', 'clash.title'],
-  '/progress': ['nav.progress', 'progress.title'],
-  '/plan-room': ['nav.plan_room', 'plan_room.title'],
-  '/assemblies': ['nav.assemblies', 'assemblies.title'],
-  '/assemblies/library': ['nav.assembly_library', 'assemblies.library.title'],
-  '/dwg-takeoff': ['nav.dwg_takeoff', 'dwg_takeoff.hero_title'],
-  '/schedule': ['nav.schedule', 'schedule.title'],
-  '/5d': ['nav.5d_cost_model', 'costmodel.title'],
-  '/tendering': ['nav.tendering', 'tendering.title'],
-  '/photos': ['nav.photos', 'photos.title'],
-  '/files/transmittals': ['transmittals.title', 'files.transmittals.title'],
-  '/punchlist': ['nav.punchlist', 'punch.title'],
-  '/field-reports': ['nav.field_reports', 'fieldreports.title'],
-  '/project-intelligence': ['nav.estimation_dashboard', 'project_intelligence.page_title_v191'],
   '/payroll': ['nav.payroll', 'payroll.title'],
-  '/projects/:projectId/payroll': ['nav.payroll', 'payroll.title'],
-  '/portfolio/capacity': ['nav.capacity_planning', 'capacity.title'],
-  '/portfolio/leveling': ['nav.resource_leveling', 'leveling.title'],
   '/notifications': ['nav.notifications', 'notifications.title'],
 };
 
@@ -97,25 +70,18 @@ const SPLIT_BASELINE: Record<string, [string, string]> = {
  * These seven are internal or developer surfaces rather than shipped modules,
  * which is why they were never named, and each line says which.
  */
-const UNNAMED_BASELINE: Record<string, string> = {
-  '/chat/admin': 'operator diagnostics for the chat service',
-  '/schedule/:id/cpm': 'a view mode of /schedule rather than a module of its own',
-  '/files/search': 'a results surface reached from search, never from the sidebar',
-  '/markups/compare': 'a comparison view opened from a document, not a destination',
-  '/eac/demo': 'component gallery for the EAC primitives',
-  '/styles-lab': 'internal component gallery',
-  '/property-dev/dashboards/:key': 'renders a dashboard whose name is the record',
-};
+// D-Central FieldOps fork (Task #156): all 7 upstream entries named
+// routes this fork pruned entirely. None of the 8 kept modules have
+// this defect.
+const UNNAMED_BASELINE: Record<string, string> = {};
 
 /**
  * Routes whose page names itself but whose title has no map entry, so the top
  * bar falls back to the English literal and stays English in every language.
  */
-const UNTRANSLATED_TOPBAR_BASELINE: Record<string, string> = {
-  '/admin/webhook-targets': 'administrator surface, added without a map entry',
-  '/modules/developer-guide': 'developer documentation page',
-  '/geo/admin': 'administrator surface, added without a map entry',
-};
+// D-Central FieldOps fork (Task #156): all 3 upstream entries named
+// routes this fork pruned entirely.
+const UNTRANSLATED_TOPBAR_BASELINE: Record<string, string> = {};
 
 /** Resolve `frontend/src` whether vitest was started at `frontend/` or the repo root. */
 function findSrcRoot(): string {
@@ -221,15 +187,23 @@ describe('page title keys', () => {
 
   // A parser that matches nothing reports a clean bill of health for every
   // check below it, so prove the population before trusting any verdict about
-  // it. These floors are far under the live figures (257 routes, 184 entries).
+  // it.
+  //
+  // D-Central FieldOps fork (Task #156, frontend-pruning pass): the route
+  // floor was 200, sized for upstream's ~257-route App.tsx. This fork
+  // mounts only the 8 façade-backed modules plus auth/landing routes (see
+  // docs/ARCHITECTURE.md's Task #156 status entries), so it's scaled down
+  // to match, not removed. TITLE_I18N_MAP itself (in Header.tsx) is
+  // untouched by the pruning pass, so its floor and the known-entry check
+  // stay at the original values.
   it('actually read the routes and the map', () => {
-    expect(routes.length, 'no routed titles parsed out of App.tsx').toBeGreaterThan(200);
+    expect(routes.length, 'no routed titles parsed out of App.tsx').toBeGreaterThan(5);
     expect(Object.keys(titleMap).length, 'TITLE_I18N_MAP parsed as empty').toBeGreaterThan(150);
     expect(titleMap['Bill of Quantities'], 'a known entry parsed wrong').toBe('boq.title');
     expect(
       routes.filter((r) => r.h1Key !== null).length,
       'no page heading keys found; the h1 shapes stopped matching',
-    ).toBeGreaterThan(50);
+    ).toBeGreaterThan(3);
   });
 
   it('titleKeyAgreement: the top bar and the page heading name one screen once', () => {

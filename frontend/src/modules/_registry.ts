@@ -20,49 +20,20 @@ import type {
 } from './_types';
 
 /* ── Module manifest imports ───────────────────────────────────────── */
-
-import { manifest as assemblies } from './assemblies/manifest';
-import { manifest as methodology } from './methodology/manifest';
-import { manifest as validation } from './validation/manifest';
-import { manifest as schedule } from './schedule/manifest';
-import { manifest as fiveDCostModel } from './5d-cost-model/manifest';
-import { manifest as tendering } from './tendering/manifest';
-import { manifest as reports } from './reports/manifest';
-import { manifest as sustainability } from './sustainability/manifest';
-import { manifest as costBenchmark } from './cost-benchmark/manifest';
-import { manifest as pdfTakeoff } from './pdf-takeoff/manifest';
-import { manifest as collaboration } from './collaboration/manifest';
-import { manifest as riskAnalysis } from './risk-analysis/manifest';
-import { manifest as gaebExchange } from './gaeb-exchange/manifest';
-// Wave 5 Epic I — 20 country exchange modules collapsed into one polymorphic
-// module. Each old route slug (au-boq-exchange, …, us-masterformat-exchange)
-// is still mounted as a back-compat route by `regional-exchange/manifest.tsx`.
-import { manifest as regionalExchange } from './regional-exchange/manifest';
-import { manifest as ddcIfcConverter } from './ddc-ifc-converter/manifest';
-import { manifest as ddcRvtConverter } from './ddc-rvt-converter/manifest';
-import { manifest as pipelines } from './pipelines/manifest';
+//
+// D-Central FieldOps fork (Task #156, frontend-pruning pass): none of
+// these ~17 optional modules (assemblies, methodology, validation,
+// schedule, 5D cost model, tendering, reports, sustainability, cost
+// benchmarks, PDF takeoff, collaboration, risk analysis, GAEB exchange,
+// regional exchange, IFC/RVT converters, pipelines) are among the 8
+// modules this project's REST façade backs — see docs/ARCHITECTURE.md's
+// Task #156 status entries. The registry is emptied rather than each
+// manifest file deleted, so re-enabling any of them later (should this
+// fork's scope ever grow) is a one-line change, not a file recovery.
 
 /* ── Registry ──────────────────────────────────────────────────────── */
 
-export const MODULE_REGISTRY: ModuleManifest[] = [
-  assemblies,
-  methodology,
-  validation,
-  schedule,
-  fiveDCostModel,
-  tendering,
-  reports,
-  sustainability,
-  costBenchmark,
-  pdfTakeoff,
-  collaboration,
-  riskAnalysis,
-  gaebExchange,
-  regionalExchange,
-  ddcIfcConverter,
-  ddcRvtConverter,
-  pipelines,
-];
+export const MODULE_REGISTRY: ModuleManifest[] = [];
 
 /* ── Helper functions ──────────────────────────────────────────────── */
 

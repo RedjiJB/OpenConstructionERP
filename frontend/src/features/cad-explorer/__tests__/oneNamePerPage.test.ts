@@ -243,7 +243,12 @@ describe('no other surface mints a second name for it (#149)', () => {
   });
 });
 
-describe('the route title and the title map move together (#149)', () => {
+// D-Central FieldOps fork (Task #156, frontend-pruning pass): /data-explorer
+// itself is pruned from App.tsx entirely (see docs/ARCHITECTURE.md's Task
+// #156 status entries) -- there is no live route or title left for this
+// block to read. The two describe blocks above scan source text for
+// retired-name string literals regardless of routing and are unaffected.
+describe.skip('the route title and the title map move together (#149)', () => {
   // The coupling that has no build error and no other test. App.tsx passes a
   // bare English string as the <P title>, and Header's TITLE_I18N_MAP turns
   // that string into an i18n key. Header.tsx:195 falls back to

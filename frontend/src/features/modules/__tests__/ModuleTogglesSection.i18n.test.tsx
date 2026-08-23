@@ -102,7 +102,13 @@ function renderSectionFr() {
   );
 }
 
-describe('module registry cards in German', () => {
+// D-Central FieldOps fork (Task #156, frontend-pruning pass): these
+// cards render entries from MODULE_REGISTRY (collaboration, pdf-takeoff),
+// which this fork deliberately empties -- none of those ~17 optional
+// modules are among the 8 this project's REST façade backs (see
+// src/modules/_registry.ts and docs/ARCHITECTURE.md's Task #156 status
+// entries). There are no cards left to render.
+describe.skip('module registry cards in German', () => {
   it('shows a name a locale file carries', () => {
     // `collab.title`, translated in every locale file.
     renderSection();
@@ -152,7 +158,8 @@ describe('module registry cards in German', () => {
   });
 });
 
-describe('module registry cards in French', () => {
+// D-Central FieldOps fork (Task #156): same reason as the German block above.
+describe.skip('module registry cards in French', () => {
   // The German suite above proves the merge order for one locale. This proves
   // it generalizes: French carries none of these manifest keys in its locale
   // file before this sweep, so a card that renders correctly here only does

@@ -121,7 +121,12 @@ describe('Collaboration types', () => {
   });
 });
 
-describe('Collaboration module registration', () => {
+// D-Central FieldOps fork (Task #156, frontend-pruning pass): this
+// module is deregistered along with the other ~17 optional modules not
+// among the 8 this project's REST façade backs (see
+// src/modules/_registry.ts and docs/ARCHITECTURE.md's Task #156 status
+// entries). The component/type tests above are untouched and still real.
+describe.skip('Collaboration module registration', () => {
   it('should be registered in MODULE_REGISTRY', async () => {
     const { MODULE_REGISTRY } = await import('../_registry');
     const mod = MODULE_REGISTRY.find((m) => m.id === 'collaboration');

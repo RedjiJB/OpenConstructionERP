@@ -129,6 +129,12 @@ describe('manifest names and descriptions', () => {
   });
 });
 
+// D-Central FieldOps fork (Task #156, frontend-pruning pass): these two
+// tests assert on ROUTE_TITLES entries from MODULE_REGISTRY modules this
+// fork deliberately empties (see src/modules/_registry.ts and
+// docs/ARCHITECTURE.md's Task #156 status entries) -- there are no
+// module routes left to have titles at all. The first test in this
+// block ('are i18n keys...') still holds vacuously and stays enabled.
 describe('module route titles', () => {
   it('are i18n keys outside the one module that names standards', () => {
     const literals = ROUTE_TITLES.filter(
@@ -137,7 +143,7 @@ describe('module route titles', () => {
     expect(literals).toEqual([]);
   });
 
-  it('keep the exception to the modules that declare it', () => {
+  it.skip('keep the exception to the modules that declare it', () => {
     // If regional-exchange ever keys its titles, this fails and the exception
     // above gets deleted rather than quietly outliving its reason.
     for (const moduleId of LITERAL_ROUTE_TITLE_MODULES) {
@@ -147,7 +153,7 @@ describe('module route titles', () => {
     }
   });
 
-  it('name a key both English and German answer', () => {
+  it.skip('name a key both English and German answer', () => {
     const keyed = ROUTE_TITLES.filter((e) => isModuleI18nKey(e.value));
     expect(keyed.length).toBeGreaterThan(0);
     const unanswered = keyed

@@ -103,7 +103,14 @@ describe('the screen catalogue and the routes that mount those screens', () => {
   it('offers no screen the router cannot mount', () => {
     // If the regex above ever stops matching, every row looks dead at once;
     // say so plainly instead of reporting the whole menu as broken.
-    expect(staticRoutes.size).toBeGreaterThan(100);
+    //
+    // D-Central FieldOps fork (Task #156, frontend-pruning pass): this
+    // threshold was 100 upstream, sized for OpenConstructionERP's full
+    // ~200-route surface. This fork deliberately mounts only the 8
+    // façade-backed modules plus auth/landing routes (see
+    // docs/ARCHITECTURE.md's Task #156 status entries) — around a dozen
+    // <Route> entries — so the canary is scaled down to match, not removed.
+    expect(staticRoutes.size).toBeGreaterThan(5);
 
     const dead: string[] = [];
     for (const item of navItems) {
@@ -156,7 +163,10 @@ describe('the screen catalogue and the routes that mount those screens', () => {
         moduleKey: line.match(/\bmoduleKey:\s*'([^']+)'/)?.[1],
       }))
       .filter((entry): entry is { path: string; moduleKey: string | undefined } => Boolean(entry.path));
-    expect(entries.length).toBeGreaterThan(10);
+    // D-Central FieldOps fork (Task #156): scaled down from 10 along with
+    // the route count above — the palette lists the same trimmed 8+1 pages
+    // as the sidebar now, not upstream's full page catalogue.
+    expect(entries.length).toBeGreaterThan(5);
 
     const silent: string[] = [];
     for (const entry of entries) {

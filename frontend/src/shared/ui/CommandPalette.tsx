@@ -9,30 +9,24 @@ import {
   Search,
   LayoutDashboard,
   FolderOpen,
-  FolderPlus,
   Table2,
   Database,
-  Boxes,
-  Compass,
   CalendarDays,
-  TrendingUp,
-  FileText,
-  FilePlus2,
-  FileBarChart,
   ShieldCheck,
-  Leaf,
   Package,
-  Settings,
-  Sparkles,
-  Wand2,
-  Download,
   CornerDownLeft,
   Users,
   HelpCircle,
   CheckSquare,
   ClipboardList,
   AlertTriangle,
+  FileText,
   Globe,
+  Bell,
+  Truck,
+  Timer,
+  Warehouse,
+  Wallet,
   type LucideIcon,
 } from 'lucide-react';
 import { projectsApi, type Project } from '@/features/projects/api';
@@ -124,29 +118,23 @@ interface CommandPaletteProps {
 }
 
 /* ── Static page entries ───────────────────────────────────────────────── */
-
+//
+// D-Central FieldOps fork (Task #156, frontend-pruning pass): trimmed to
+// the 8 façade-backed modules plus the landing page — see
+// docs/ARCHITECTURE.md's Task #156 status entries. An entry for a route
+// App.tsx no longer mounts would send the palette's own "no dead links"
+// check (navCatalog.test.ts) red, and worse, would land a real user on
+// Not Found.
 const PAGE_RESULTS: SearchResult[] = [
   { id: 'page-dashboard', type: 'page', labelKey: 'nav.dashboard', icon: LayoutDashboard, path: '/' },
-  { id: 'page-projects', type: 'page', labelKey: 'projects.title', icon: FolderOpen, path: '/projects' },
-  { id: 'page-boq', type: 'page', labelKey: 'boq.title', icon: Table2, path: '/boq' },
-  { id: 'page-costs', type: 'page', labelKey: 'costs.title', icon: Database, path: '/costs' },
-  { id: 'page-catalog', type: 'page', labelKey: 'catalog.title', icon: Boxes, path: '/catalog' },
-  { id: 'page-cost-explorer', type: 'page', labelKey: 'nav.cost_explorer', icon: Compass, path: '/cost-explorer' },
-  { id: 'page-ai-estimator', type: 'page', labelKey: 'nav.ai_estimator', icon: Wand2, path: '/ai-estimator' },
-  { id: 'page-ai-estimate', type: 'page', labelKey: 'nav.ai_estimate', icon: Sparkles, path: '/ai-estimate' },
-  { id: 'page-schedule', type: 'page', labelKey: 'schedule.title', icon: CalendarDays, path: '/schedule' },
-  { id: 'page-5d', type: 'page', labelKey: 'nav.5d_cost_model', icon: TrendingUp, path: '/5d' },
-  { id: 'page-tendering', type: 'page', labelKey: 'tendering.title', icon: FileText, path: '/tendering' },
-  { id: 'page-reports', type: 'page', labelKey: 'nav.reports', icon: FileBarChart, path: '/reports' },
-  { id: 'page-validation', type: 'page', labelKey: 'validation.title', icon: ShieldCheck, path: '/validation' },
-  { id: 'page-sustainability', type: 'page', labelKey: 'nav.sustainability', icon: Leaf, path: '/sustainability', moduleKey: 'sustainability' },
-  { id: 'page-modules', type: 'page', labelKey: 'modules.title', icon: Package, path: '/modules' },
-  { id: 'page-settings', type: 'page', labelKey: 'nav.settings', icon: Settings, path: '/settings' },
-  // Quick actions
-  { id: 'action-new-project', type: 'page', labelKey: 'command_palette.action_new_project', description: 'Ctrl+N', icon: FolderPlus, path: '/projects/new' },
-  { id: 'action-new-boq', type: 'page', labelKey: 'command_palette.action_new_boq', description: 'Ctrl+Shift+N', icon: FilePlus2, path: '/boq' },
-  { id: 'action-validate', type: 'page', labelKey: 'command_palette.action_run_validation', description: 'Ctrl+Shift+V', icon: ShieldCheck, path: '/validation' },
-  { id: 'action-import-db', type: 'page', labelKey: 'command_palette.action_import_database', icon: Download, path: '/costs/import' },
+  { id: 'page-notifications', type: 'page', labelKey: 'nav.notifications', icon: Bell, path: '/notifications' },
+  { id: 'page-equipment', type: 'page', labelKey: 'nav.equipment', icon: Truck, path: '/equipment' },
+  { id: 'page-resources', type: 'page', labelKey: 'nav.resources', icon: Users, path: '/resources' },
+  { id: 'page-field-time', type: 'page', labelKey: 'nav.field_time', icon: Timer, path: '/field-time' },
+  { id: 'page-site-inventory', type: 'page', labelKey: 'site_inventory.title', icon: Warehouse, path: '/site-inventory' },
+  { id: 'page-procurement', type: 'page', labelKey: 'procurement.title', icon: Package, path: '/procurement' },
+  { id: 'page-payroll', type: 'page', labelKey: 'nav.payroll', icon: Wallet, path: '/payroll' },
+  { id: 'page-teams', type: 'page', labelKey: 'teams.title', icon: ShieldCheck, path: '/teams' },
 ];
 
 /* ── Recent items (stored in localStorage) ─────────────────────────────── */

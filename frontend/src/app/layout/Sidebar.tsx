@@ -12,7 +12,6 @@ import {
   CalendarDays,
   Boxes,
   Settings,
-  Info,
   ChevronDown,
   ChevronRight,
   Sparkles,
@@ -94,11 +93,13 @@ type AdminGridItem = NavItem & { onClick?: () => void };
 // (`/admin/audit-log`) stays live for deep links. The slot it vacated now
 // holds the "Edit menu" action tile (see `editMenuGridItem` below), which
 // opens the sidebar customiser in place.
-const adminGridItems: NavItem[] = [
-  { labelKey: 'sidebar.admin_grid.settings', to: '/settings', icon: Settings },
-  { labelKey: 'sidebar.admin_grid.users', to: '/users', icon: Users },
-  { labelKey: 'sidebar.admin_grid.about', to: '/about', icon: Info },
-];
+// D-Central FieldOps fork (Task #156, frontend-pruning pass): Settings,
+// Users and About are all pruned routes (see docs/ARCHITECTURE.md's Task
+// #156 status entries — user management is admin-provisioned via MCP
+// tools, not a settings screen) so this grid is empty rather than
+// linking to Not Found. The "Edit menu" tile still renders here (see
+// `adminGridWithEdit` below) since it's an in-place action, not a route.
+const adminGridItems: NavItem[] = [];
 
 /** Flat lookup of every NavItem in the sidebar, keyed by `to`. The
  *  Pinned section uses this to resolve a stored route string into a

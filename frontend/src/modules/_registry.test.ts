@@ -8,7 +8,16 @@ import {
   getModulesByCategory,
 } from './_registry';
 
-describe('MODULE_REGISTRY', () => {
+// D-Central FieldOps fork (Task #156, frontend-pruning pass): every test
+// below asserts the contents of the upstream MODULE_REGISTRY (assemblies,
+// schedule, tendering, regional exchange, etc.), which this fork
+// deliberately empties -- none of those ~17 optional modules are among
+// the 8 this project's REST façade backs (see docs/ARCHITECTURE.md's
+// Task #156 status entries, and src/modules/_registry.ts's own comment).
+// Skipped rather than deleted for the same reason the registry itself was
+// emptied rather than gutted: re-enabling modules later un-skips this
+// file for free.
+describe.skip('MODULE_REGISTRY', () => {
   it('should contain at least 16 modules (post Wave 5 Epic I collapse)', () => {
     // Wave 5 Epic I collapsed 20 country exchange modules into one
     // polymorphic `regional-exchange` module. The registry count
@@ -107,7 +116,7 @@ describe('MODULE_REGISTRY', () => {
   });
 });
 
-describe('getAllModuleRoutes', () => {
+describe.skip('getAllModuleRoutes', () => {
   it('should return flat list of routes from all modules', () => {
     const routes = getAllModuleRoutes();
     expect(routes.length).toBeGreaterThanOrEqual(10);
@@ -139,7 +148,7 @@ describe('getAllModuleRoutes', () => {
   });
 });
 
-describe('getModuleNavItems', () => {
+describe.skip('getModuleNavItems', () => {
   it('should return nav items for tools group', () => {
     const items = getModuleNavItems('tools');
     // Tools group holds sustainability. Other tools (benchmarks,
@@ -166,7 +175,7 @@ describe('getModuleNavItems', () => {
   });
 });
 
-describe('getModuleDefaults', () => {
+describe.skip('getModuleDefaults', () => {
   it('should return defaults for all modules', () => {
     const defaults = getModuleDefaults();
     // Core modules — enabled by default
@@ -195,7 +204,7 @@ describe('getModuleDefaults', () => {
   });
 });
 
-describe('getModulesByCategory', () => {
+describe.skip('getModulesByCategory', () => {
   it('should group modules by category', () => {
     const grouped = getModulesByCategory();
     expect(grouped['estimation']).toBeDefined();

@@ -204,7 +204,12 @@ describe('scale-helpers', () => {
   });
 });
 
-describe('TakeoffViewerModule', () => {
+// D-Central FieldOps fork (Task #156, frontend-pruning pass): pdf-takeoff
+// is deregistered along with the other ~17 optional modules not among
+// the 8 this project's REST façade backs (see src/modules/_registry.ts
+// and docs/ARCHITECTURE.md's Task #156 status entries). scale-helpers
+// above is untouched and still real.
+describe.skip('TakeoffViewerModule', () => {
   // Lazy loaded component — test manifest registration
   it('should be registered in MODULE_REGISTRY', async () => {
     const { MODULE_REGISTRY } = await import('../_registry');

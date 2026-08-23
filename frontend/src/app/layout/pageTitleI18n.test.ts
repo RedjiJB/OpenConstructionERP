@@ -45,18 +45,11 @@ for (const match of APP_SOURCE.matchAll(/<P\s+title=(["'])(.*?)\1/gs)) {
  * them, rather than pointing at a neighbouring key that means something else.
  * A new route belongs in the map, not in this list.
  */
-const ENGLISH_ON_PURPOSE = new Set([
-  'CPM',
-  'Chat Observability',
-  'Compare Revisions',
-  'EAC Block Primitives',
-  'Geo Hub Admin',
-  'Module Developer Guide',
-  'Property Development Dashboard',
-  'Search across projects',
-  'Styles Lab',
-  'Webhook Targets',
-]);
+// D-Central FieldOps fork (Task #156, frontend-pruning pass): all 10
+// upstream entries named titles of routes this fork pruned entirely (see
+// docs/ARCHITECTURE.md's Task #156 status entries). None of the 8 kept
+// modules' titles are English-on-purpose.
+const ENGLISH_ON_PURPOSE = new Set<string>([]);
 
 describe('page titles and the locale bundle', () => {
   it('translates every route title the app mounts', () => {
