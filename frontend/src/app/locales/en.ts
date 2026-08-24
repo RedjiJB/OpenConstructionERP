@@ -7060,6 +7060,7 @@ const resource = {
     "pwa.last_synced": "Last synced {{when}}",
     "nav.field_reports": "Field Reports",
     "nav.vendors": "Vendors",
+    "nav.site_cost": "Site Cost Summary",
     "nav.field_time": "Field Time",
     "field_time.title": "Field Time",
     "field_time.subtitle": "Cost-coded, signed timesheets for the labour and plant that worked on site each day.",

@@ -31,6 +31,7 @@ import {
   BarChart3,
   ClipboardList,
   Building2,
+  DollarSign,
 } from 'lucide-react';
 
 export interface NavItem {
@@ -95,6 +96,7 @@ export const navGroups: NavGroup[] = [
       { labelKey: 'nav.bi_dashboards', defaultLabel: 'BI Dashboards', to: '/bi-dashboards', icon: BarChart3 },
       { labelKey: 'nav.field_reports', defaultLabel: 'Field Reports', to: '/field-reports', icon: ClipboardList },
       { labelKey: 'nav.vendors', defaultLabel: 'Vendors', to: '/vendors', icon: Building2 },
+      { labelKey: 'nav.site_cost', defaultLabel: 'Site Cost Summary', to: '/5d', icon: DollarSign },
     ],
   },
 ];

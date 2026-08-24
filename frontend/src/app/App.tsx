@@ -74,6 +74,7 @@ const SettingsPage = lazy(() => import('@/features/settings/SettingsPage'));
 const BIDashboardsPage = lazy(() => import('@/features/bi-dashboards/BIDashboardsPage'));
 const FieldReportsPage = lazy(() => import('@/features/fieldreports/FieldReportsPage'));
 const VendorsPage = lazy(() => import('@/features/vendors/VendorsPage'));
+const SiteCostPage = lazy(() => import('@/features/site-cost/SiteCostPage'));
 
 // This backend has no Projects module, but several kept pages
 // (site-inventory, procurement, payroll, teams, field-time) are gated
@@ -344,6 +345,7 @@ export default function App() {
           <Route path="/bi-dashboards" element={<P title="BI Dashboards"><BIDashboardsPage /></P>} />
           <Route path="/field-reports" element={<P title="Field Reports"><FieldReportsPage /></P>} />
           <Route path="/vendors" element={<P title="Vendors"><VendorsPage /></P>} />
+          <Route path="/5d" element={<P title="Site Cost Summary"><SiteCostPage /></P>} />
 
           {/* Plugin module routes — lazy-loaded, empty registry today */}
           {moduleRoutes}

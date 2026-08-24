@@ -20,6 +20,26 @@ import { PLAYBOOKS } from './playbooks';
 import { resolveStepRoute } from './progress';
 import type { Playbook } from './types';
 
+// This fork routes 17 of the vendored app's ~179 pages (see app/App.tsx) --
+// everything else is deliberately left vendored-but-unrouted. PLAYBOOKS is
+// vendored content written for the full app: most cases walk through pages
+// this fork never routed (BOQ, Finance, Portfolio, Schedule, Assemblies,
+// Reports, Takt, ...). Counting those as "N cases for this module" would be
+// the exact dead-affordance problem this project has fixed everywhere else
+// it appeared (see the Notifications/Payroll info-card chip restoration) --
+// a case whose steps dead-end partway through isn't a real guided journey
+// here, it just looks like one. A playbook only counts for a module if every
+// step it takes is somewhere a user can actually land in this fork.
+const KEPT_ROUTES = new Set([
+  '/', '/dashboard', '/notifications', '/equipment', '/resources', '/field-time',
+  '/site-inventory', '/procurement', '/payroll', '/teams', '/map', '/inbox',
+  '/admin/webhook-targets', '/settings', '/bi-dashboards', '/field-reports', '/vendors',
+]);
+
+function isFullyRoutedInThisFork(pb: Playbook): boolean {
+  return pb.steps.every((step) => KEPT_ROUTES.has(normalizeCaseRoute(step.to)));
+}
+
 /**
  * Normalise a route to the unscoped, query-less base used for matching.
  *
@@ -84,6 +104,7 @@ function buildIndex(): Map<string, Playbook[]> {
   // PLAYBOOKS is already sorted by curated `order`, so each bucket inherits
   // that order - the first entry is the most prominent case for that module.
   for (const pb of PLAYBOOKS) {
+    if (!isFullyRoutedInThisFork(pb)) continue;
     // A case that visits the same route in several steps still counts once
     // for that route, so a multi-step case never inflates the module count.
     const seen = new Set<string>();

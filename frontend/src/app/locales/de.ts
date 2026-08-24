@@ -9398,6 +9398,7 @@ const resource = {
     "pwa.last_synced": "Zuletzt synchronisiert {{when}}",
     "nav.field_reports": "Baustellenberichte",
     "nav.vendors": "Lieferanten",
+    "nav.site_cost": "Standortkosten-Übersicht",
     "nav.field_time": "Baustellenzeiten",
     "field_time.title": "Baustellenzeiten",
     "field_time.subtitle": "Kostencodierte, unterschriebene Stundenzettel für Lohn und Geräte, die täglich auf der Baustelle im Einsatz waren.",
