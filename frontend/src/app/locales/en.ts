@@ -7059,6 +7059,7 @@ const resource = {
     "pwa.offline_body": "OCERP can't reach the server right now. Cached pages remain available; any changes you make will need to be re-saved once you reconnect.",
     "pwa.last_synced": "Last synced {{when}}",
     "nav.field_reports": "Field Reports",
+    "nav.vendors": "Vendors",
     "nav.field_time": "Field Time",
     "field_time.title": "Field Time",
     "field_time.subtitle": "Cost-coded, signed timesheets for the labour and plant that worked on site each day.",

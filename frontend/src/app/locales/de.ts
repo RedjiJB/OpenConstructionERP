@@ -9397,6 +9397,7 @@ const resource = {
     "pwa.offline_body": "OCERP kann den Server momentan nicht erreichen. Zwischengespeicherte Seiten bleiben verfügbar; vorgenommene Änderungen müssen nach der erneuten Verbindung neu gespeichert werden.",
     "pwa.last_synced": "Zuletzt synchronisiert {{when}}",
     "nav.field_reports": "Baustellenberichte",
+    "nav.vendors": "Lieferanten",
     "nav.field_time": "Baustellenzeiten",
     "field_time.title": "Baustellenzeiten",
     "field_time.subtitle": "Kostencodierte, unterschriebene Stundenzettel für Lohn und Geräte, die täglich auf der Baustelle im Einsatz waren.",

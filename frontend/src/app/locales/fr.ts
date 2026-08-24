@@ -8222,6 +8222,7 @@ const resource = {
     "punch.select_project": "Sélectionner un projet...",
     "punch.title_required": "Le titre est obligatoire",
     "nav.field_reports": "Rapports de chantier",
+    "nav.vendors": "Fournisseurs",
     "nav.field_time": "Temps chantier",
     "field_time.title": "Temps chantier",
     "field_time.subtitle": "Feuilles de temps signées et ventilées par code de coût pour la main-d'oeuvre et le matériel présents sur le chantier chaque jour.",
