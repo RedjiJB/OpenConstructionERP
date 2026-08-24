@@ -674,10 +674,6 @@ export default function PayrollPage() {
             }),
             onClick: () => navigate('/resources'),
           },
-          {
-            label: t('payroll.intro_link_5d', { defaultValue: '5D Cost' }),
-            onClick: () => navigate('/5d'),
-          },
         ]}
       >
         {t('payroll.intro_body', {
