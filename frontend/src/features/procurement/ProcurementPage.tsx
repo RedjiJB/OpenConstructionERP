@@ -440,16 +440,8 @@ export function ProcurementPage() {
         }
         links={[
           {
-            label: t('nav.finance', { defaultValue: 'Finance' }),
-            onClick: () => navigate('/finance'),
-          },
-          {
-            label: t('nav.supplier_catalogs', { defaultValue: 'Supplier Catalogs' }),
-            onClick: () => navigate('/supplier-catalogs'),
-          },
-          {
-            label: t('nav.contacts', { defaultValue: 'Contacts' }),
-            onClick: () => navigate('/contacts'),
+            label: t('nav.vendors', { defaultValue: 'Vendors' }),
+            onClick: () => navigate('/vendors'),
           },
         ]}
       >

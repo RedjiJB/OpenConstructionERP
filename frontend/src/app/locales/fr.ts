@@ -881,7 +881,7 @@ const resource = {
     "teams.tab_teams": "Équipes",
     "teams.title": "Équipes et visibilité",
     "nav.map": "Carte",
-    "map.subtitle": "Personnel et équipement, situés à partir des emplacements enregistrés.",
+    "map.subtitle": "Chantiers, personnel et équipement, situés à partir des emplacements enregistrés.",
     "teams.toast_error": "Changement d'accès refusé",
     "teams.update_failed": "Impossible d'enregistrer cette équipe",
     "teams.validation_clean": "La configuration d'accès de ce projet est correcte.",

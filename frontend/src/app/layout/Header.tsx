@@ -118,6 +118,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   // Operations
   'Daily Diary': 'nav.daily_diary',
   'Field Reports': 'nav.field_reports',
+  'Vendors': 'nav.vendors',
   'Equipment & Fleet': 'nav.equipment',
   'Resources & Crew': 'nav.resources',
   'Service & Maintenance': 'nav.service',

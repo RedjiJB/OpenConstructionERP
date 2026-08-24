@@ -432,16 +432,6 @@ export function EquipmentPage() {
             label: t('equipment.intro_link_resources', { defaultValue: 'Resources' }),
             onClick: () => navigate('/resources'),
           },
-          {
-            label: t('equipment.intro_link_finance', { defaultValue: 'Finance' }),
-            onClick: () => navigate('/finance'),
-          },
-          {
-            label: t('equipment.intro_link_building_assets', {
-              defaultValue: 'Building Assets (FM)',
-            }),
-            onClick: () => navigate('/assets'),
-          },
         ]}
       >
         {t('equipment.intro_body', {

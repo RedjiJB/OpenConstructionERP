@@ -929,7 +929,7 @@ const resource = {
     "teams.tab_teams": "Teams",
     "teams.title": "Teams and visibility",
     "nav.map": "Map",
-    "map.subtitle": "Crew and equipment, plotted from logged locations.",
+    "map.subtitle": "Sites, crew, and equipment, plotted from logged locations.",
     "teams.toast_error": "Access change refused",
     "teams.update_failed": "Could not save that team",
     "teams.validation_clean": "This project’s access configuration checks out.",

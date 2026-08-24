@@ -860,7 +860,7 @@ const resource = {
     "teams.tab_teams": "Teams",
     "teams.title": "Teams und Sichtbarkeit",
     "nav.map": "Karte",
-    "map.subtitle": "Team und Ausrüstung, dargestellt anhand erfasster Standorte.",
+    "map.subtitle": "Standorte, Team und Ausrüstung, dargestellt anhand erfasster Positionen.",
     "teams.toast_error": "Zugriffsänderung abgelehnt",
     "teams.update_failed": "Dieses Team konnte nicht gespeichert werden",
     "teams.validation_clean": "Die Zugriffskonfiguration dieses Projekts ist in Ordnung.",

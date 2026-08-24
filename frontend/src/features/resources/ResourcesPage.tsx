@@ -611,26 +611,14 @@ export function ResourcesPage() {
             <InsightsToggleButton open={insights.open} onClick={insights.toggle} />
             <ModuleGuideButton content={resourcesGuide} />
             {tab === 'assignments' && (
-              <>
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  icon={<CalendarRange size={14} />}
-                  onClick={() => navigate('/portfolio/capacity')}
-                >
-                  {t('resources.assignments_capacity', {
-                    defaultValue: 'Portfolio capacity',
-                  })}
-                </Button>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  icon={<Plus size={14} />}
-                  onClick={() => setProposeOpen(true)}
-                >
-                  {t('resources.propose', { defaultValue: 'Propose Assignment' })}
-                </Button>
-              </>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<Plus size={14} />}
+                onClick={() => setProposeOpen(true)}
+              >
+                {t('resources.propose', { defaultValue: 'Propose Assignment' })}
+              </Button>
             )}
             {tab === 'resources' && (
               <Button
@@ -687,22 +675,6 @@ export function ResourcesPage() {
             : undefined
         }
         links={[
-          {
-            label: t('resources.intro_link_capacity', { defaultValue: 'Capacity Planning' }),
-            onClick: () => navigate('/portfolio/capacity'),
-          },
-          {
-            label: t('resources.intro_link_leveling', { defaultValue: 'Resource Leveling' }),
-            onClick: () => navigate('/portfolio/leveling'),
-          },
-          {
-            label: t('resources.intro_link_schedule', { defaultValue: '4D Schedule' }),
-            onClick: () => navigate('/schedule'),
-          },
-          {
-            label: t('resources.intro_link_tasks', { defaultValue: 'Tasks' }),
-            onClick: () => navigate('/tasks'),
-          },
           {
             label: t('resources.intro_link_equipment', { defaultValue: 'Equipment' }),
             onClick: () => navigate('/equipment'),
