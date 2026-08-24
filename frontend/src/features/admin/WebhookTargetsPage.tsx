@@ -143,10 +143,6 @@ export function WebhookTargetsPage() {
         }
         links={[
           {
-            label: t('nav.integrations', { defaultValue: 'Integrations' }),
-            onClick: () => navigate('/integrations'),
-          },
-          {
             label: t('nav.notifications', { defaultValue: 'Notifications' }),
             onClick: () => navigate('/notifications'),
           },
@@ -154,7 +150,7 @@ export function WebhookTargetsPage() {
       >
         {t('admin_webhook_targets.intro_body', {
           defaultValue:
-            'Register outbound HTTP endpoints that receive matching notification events as they happen, so your own systems can react without polling. Pair it with the friendlier prebuilt connectors on Integrations when you just want chat or email delivery.',
+            'Register outbound HTTP endpoints that receive matching notification events as they happen, so your own systems can react without polling.',
         })}
       </DismissibleInfo>
 

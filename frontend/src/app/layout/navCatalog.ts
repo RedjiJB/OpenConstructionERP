@@ -25,6 +25,11 @@ import {
   Wallet,
   ShieldCheck,
   Map,
+  Inbox,
+  Webhook,
+  Settings,
+  BarChart3,
+  ClipboardList,
 } from 'lucide-react';
 
 export interface NavItem {
@@ -63,10 +68,10 @@ export interface NavGroup {
   dynamicGroupKey?: string;
 }
 
-// One group: the 8 façade-backed modules, plus the landing page.
-// Notifications has no sidebar row — it's reached from the header bell,
-// same as upstream — so it isn't listed here (routeIcons.ts still gives
-// it an icon via EXTRA_ROUTE_ICONS for the top-bar title chip).
+// One group: the 8 façade-backed modules, the landing page, and Inbox
+// (added on request -- unlike Notifications, which stays reached only
+// from the header bell, same as upstream; routeIcons.ts still gives it
+// an icon via EXTRA_ROUTE_ICONS for the top-bar title chip).
 export const navGroups: NavGroup[] = [
   {
     id: 'grp_overview',
@@ -75,6 +80,7 @@ export const navGroups: NavGroup[] = [
     defaultOpen: true,
     items: [
       { labelKey: 'nav.dashboard', to: '/', icon: LayoutDashboard },
+      { labelKey: 'inbox.title', defaultLabel: 'Inbox', to: '/inbox', icon: Inbox },
       { labelKey: 'nav.equipment', to: '/equipment', icon: Truck },
       { labelKey: 'nav.resources', to: '/resources', icon: Users },
       { labelKey: 'nav.field_time', to: '/field-time', icon: Timer },
@@ -83,6 +89,10 @@ export const navGroups: NavGroup[] = [
       { labelKey: 'nav.payroll', to: '/payroll', icon: Wallet },
       { labelKey: 'teams.title', defaultLabel: 'Teams and visibility', to: '/teams', icon: ShieldCheck },
       { labelKey: 'nav.map', defaultLabel: 'Map', to: '/map', icon: Map },
+      { labelKey: 'webhook_targets.title', defaultLabel: 'Notification Webhooks', to: '/admin/webhook-targets', icon: Webhook, adminOnly: true },
+      { labelKey: 'nav.settings', defaultLabel: 'Settings', to: '/settings', icon: Settings },
+      { labelKey: 'nav.bi_dashboards', defaultLabel: 'BI Dashboards', to: '/bi-dashboards', icon: BarChart3 },
+      { labelKey: 'nav.field_reports', defaultLabel: 'Field Reports', to: '/field-reports', icon: ClipboardList },
     ],
   },
 ];

@@ -272,6 +272,7 @@ export const TITLE_I18N_MAP: Record<string, string> = {
   'Credentials': 'nav.credentials',
   'Teams and Visibility': 'teams.title',
   'Map': 'nav.map',
+  'Notification Webhooks': 'webhook_targets.title',
 };
 
 /**

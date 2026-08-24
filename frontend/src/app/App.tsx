@@ -68,6 +68,11 @@ const ProcurementPage = lazy(() =>
 const PayrollPage = lazy(() => import('@/features/payroll/PayrollPage'));
 const TeamsPage = lazy(() => import('@/features/teams'));
 const MapPage = lazy(() => import('@/features/map/MapPage'));
+const InboxPage = lazy(() => import('@/features/dashboard/InboxPage'));
+const WebhookTargetsPage = lazy(() => import('@/features/admin/WebhookTargetsPage'));
+const SettingsPage = lazy(() => import('@/features/settings/SettingsPage'));
+const BIDashboardsPage = lazy(() => import('@/features/bi-dashboards/BIDashboardsPage'));
+const FieldReportsPage = lazy(() => import('@/features/fieldreports/FieldReportsPage'));
 
 // This backend has no Projects module, but several kept pages
 // (site-inventory, procurement, payroll, teams, field-time) are gated
@@ -332,6 +337,11 @@ export default function App() {
           <Route path="/payroll" element={<P title="Payroll"><PayrollPage /></P>} />
           <Route path="/teams" element={<P title="Teams and Visibility"><TeamsPage /></P>} />
           <Route path="/map" element={<P title="Map"><MapPage /></P>} />
+          <Route path="/inbox" element={<P title="Inbox"><InboxPage /></P>} />
+          <Route path="/admin/webhook-targets" element={<P title="Notification Webhooks"><WebhookTargetsPage /></P>} />
+          <Route path="/settings" element={<P title="Settings"><SettingsPage /></P>} />
+          <Route path="/bi-dashboards" element={<P title="BI Dashboards"><BIDashboardsPage /></P>} />
+          <Route path="/field-reports" element={<P title="Field Reports"><FieldReportsPage /></P>} />
 
           {/* Plugin module routes — lazy-loaded, empty registry today */}
           {moduleRoutes}
