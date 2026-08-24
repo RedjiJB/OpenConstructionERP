@@ -63,7 +63,7 @@ export const resourcesGuide: ModuleGuideContent = {
       titleDefault: 'See the bigger picture',
       bodyKey: 'guide.resources.portfolio.body',
       bodyDefault:
-        'Confirmed assignments are the source of truth for who is on site each day. Jump to Portfolio capacity and Resource leveling to balance workload across projects, and follow the links into the schedule and tasks to keep everything aligned.',
+        'Confirmed assignments are the source of truth for who is on site each day. Use the Resources tab and the Assignments board together to see who is committed where before you fulfil the next request.',
     },
   ],
   ctaKey: 'guide.resources.cta',

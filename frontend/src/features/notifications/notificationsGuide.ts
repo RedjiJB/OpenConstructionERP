@@ -29,10 +29,10 @@ export const notificationsGuide: ModuleGuideContent = {
     {
       icon: 'ListChecks',
       titleKey: 'guide.notifications.read.title',
-      titleDefault: 'Read, navigate and clear',
+      titleDefault: 'Read and clear',
       bodyKey: 'guide.notifications.read.body',
       bodyDefault:
-        'Click a notification to mark it read and jump straight to the record it points at, such as the import, BOQ or risk that raised it. Use Mark all read to clear the unread badge in one step, or the trash icon on a row to remove a single message.',
+        'Click a notification to mark it read. Use Mark all read to clear the unread badge in one step, or the trash icon on a row to remove a single message.',
     },
     {
       icon: 'Search',

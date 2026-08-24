@@ -63,7 +63,7 @@ export const payrollGuide: ModuleGuideContent = {
       titleDefault: 'Labour cost in the model',
       bodyKey: 'guide.payroll.labour_cost.body',
       bodyDefault:
-        'The labour cost card at the top shows the total cost posted from approved batches across the recorded hours, surfaced next to the 5D cost model. This keeps the running labour spend visible and ties payroll directly to the project budget.',
+        'The labour cost card at the top shows the total cost posted from approved batches across the recorded hours. This keeps the running labour spend visible and ties payroll directly to the project budget.',
     },
     {
       icon: 'Send',

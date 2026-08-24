@@ -15,15 +15,15 @@ export const procurementGuide: ModuleGuideContent = {
   titleDefault: 'Procurement',
   introKey: 'guide.procurement.intro',
   introDefault:
-    'Procurement is where you commit project spend with a vendor before any invoice arrives. Raise purchase orders, log deliveries as goods receipts, then turn a PO into an invoice so the amount flows into Finance.',
+    'Procurement is where you raise purchase orders with a vendor and track them from draft through to issued.',
   sections: [
     {
       icon: 'Workflow',
       titleKey: 'guide.procurement.tabs.title',
-      titleDefault: 'Purchase orders and goods receipts',
+      titleDefault: 'Purchase orders',
       bodyKey: 'guide.procurement.tabs.body',
       bodyDefault:
-        'The module has two tabs. Purchase Orders lists every order you have raised against the active project, with its vendor, dates, amount and status. Goods Receipts records the deliveries logged against those orders, showing received versus ordered quantities.',
+        'The Purchase Orders tab lists every order raised against the active project, with its vendor, dates, amount and status.',
     },
     {
       icon: 'PencilLine',
@@ -31,39 +31,23 @@ export const procurementGuide: ModuleGuideContent = {
       titleDefault: 'Raise a purchase order',
       bodyKey: 'guide.procurement.create.body',
       bodyDefault:
-        'Click New Purchase Order and pick the vendor, the PO type and a delivery date. Add line items with a description, quantity, unit and rate, and each amount totals for you into a subtotal, tax and grand total. Currency defaults to the project currency and the payment terms set the net days.',
+        'Click New Purchase Order and pick the vendor. Add line items with a description and quantity, and set the order total. Currency defaults to the project currency.',
     },
     {
       icon: 'Send',
       titleKey: 'guide.procurement.lifecycle.title',
-      titleDefault: 'Approve, issue and invoice',
+      titleDefault: 'Issue to the vendor',
       bodyKey: 'guide.procurement.lifecycle.body',
       bodyDefault:
-        'A new order starts as a draft. Approve it to commit the budget in Finance, then Issue it to send it to the vendor. Once issued you can create an invoice straight from the PO, which posts a payable in Finance and pushes the amount through the project budget.',
-    },
-    {
-      icon: 'ListChecks',
-      titleKey: 'guide.procurement.match.title',
-      titleDefault: 'Three-way match',
-      bodyKey: 'guide.procurement.match.body',
-      bodyDefault:
-        'Each row checks the order against its goods receipts and invoices. The match badge flags whether the line is matched, partial or not yet matched, and warns when a delivery or invoice exceeds what was ordered so you catch over-receipts and over-billing early.',
+        'A new order starts as a draft. Issue it once it is ready to send to the vendor; the status updates to reflect where the order stands.',
     },
     {
       icon: 'Database',
       titleKey: 'guide.procurement.vendors.title',
-      titleDefault: 'Vendors and retainage',
+      titleDefault: 'Vendors',
       bodyKey: 'guide.procurement.vendors.body',
       bodyDefault:
-        'Click a vendor name to open its supplier scorecard, and watch for the prequalification badge that flags vendors needing review. When an order withholds retention, a retainage chip appears and managers can release the held amount from the retainage panel.',
-    },
-    {
-      icon: 'ClipboardCheck',
-      titleKey: 'guide.procurement.receipts.title',
-      titleDefault: 'Logging deliveries',
-      bodyKey: 'guide.procurement.receipts.body',
-      bodyDefault:
-        'Goods receipts capture what actually arrived against a purchase order, each with its own reference, date and received quantity. Use them to confirm a delivery is complete before the invoice is matched and paid.',
+        'The Vendors page lists every vendor with their contact details and the total you have spent with them across your purchase orders.',
     },
   ],
   ctaKey: 'guide.procurement.cta',

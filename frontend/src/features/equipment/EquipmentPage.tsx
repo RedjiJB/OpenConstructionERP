@@ -12,8 +12,6 @@ import {
   X,
   Loader2,
   Activity,
-  Wrench,
-  ShieldCheck,
   AlertTriangle,
   MapPin,
   Pencil,
@@ -22,7 +20,6 @@ import {
   Info,
   Tags,
   Gauge,
-  HeartPulse,
   Users,
   Network,
   ArrowRight,
@@ -40,7 +37,6 @@ import {
   ModuleGuideButton,
   CollapsibleSection,
 } from '@/shared/ui';
-import { MoneyDisplay } from '@/shared/ui/MoneyDisplay';
 import { DateDisplay } from '@/shared/ui/DateDisplay';
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { TruncationNotice } from '@/shared/ui/TruncationNotice';
@@ -50,39 +46,18 @@ import { useTabKeyboardNav } from '@/shared/hooks/useTabKeyboardNav';
 import {
   listEquipment,
   getEquipment,
-  getEquipmentDashboard,
   createEquipment,
   updateEquipment,
   deleteEquipment,
   listTelemetry,
   recordTelemetry,
-  listMaintenanceWorkOrders,
-  deleteWorkOrder,
-  completeWorkOrder,
-  listInspections,
-  deleteInspection,
-  listDamageReports,
-  deleteDamageReport,
   listTypes,
-  deleteType,
   type Equipment,
   type EquipmentStatus,
-  type WorkOrderStatus,
-  type InspectionResult,
-  type DamageSeverity,
   type Ownership,
   type CreateEquipmentPayload,
-  type MaintenanceWorkOrder as ApiWorkOrder,
-  type Inspection as ApiInspection,
-  type DamageReport as ApiDamage,
   type EquipmentType as ApiEquipmentType,
 } from './api';
-import { WorkOrderFormModal } from './modals/WorkOrderFormModal';
-import { InspectionFormModal } from './modals/InspectionFormModal';
-import { DamageReportFormModal } from './modals/DamageReportFormModal';
-import { TypeFormModal } from './modals/TypeFormModal';
-import { EquipmentHealthDashboard } from './components/EquipmentHealthDashboard';
-import { FleetOptimizationPanel } from './components/FleetOptimizationPanel';
 import { equipmentGuide } from './equipmentGuide';
 import { InsightsPanel, InsightsToggleButton, useModuleInsights } from '@/features/insights';
 import { buildEquipmentInsights } from './equipmentInsights';
@@ -106,12 +81,6 @@ const EQUIPMENT_STATUS_LABELS: Record<string, string> = {
 };
 
 
-type DrawerTab =
-  | 'utilization'
-  | 'health'
-  | 'maintenance'
-  | 'certifications'
-  | 'damage';
 const EQUIPMENT_TAB_IDS = ['assets', 'types'] as const;
 type PageTab = (typeof EQUIPMENT_TAB_IDS)[number];
 
@@ -123,34 +92,6 @@ const STATUS_VARIANT: Record<
   under_maintenance: 'warning',
   decommissioned: 'neutral',
   reserved: 'blue',
-};
-
-const WO_STATUS_VARIANT: Record<
-  WorkOrderStatus,
-  'neutral' | 'blue' | 'success' | 'warning' | 'error'
-> = {
-  scheduled: 'blue',
-  in_progress: 'warning',
-  completed: 'success',
-  cancelled: 'neutral',
-};
-
-const INSPECTION_VARIANT: Record<
-  InspectionResult,
-  'neutral' | 'blue' | 'success' | 'warning' | 'error'
-> = {
-  pass: 'success',
-  fail: 'error',
-  conditional: 'warning',
-};
-
-const DAMAGE_VARIANT: Record<
-  DamageSeverity,
-  'neutral' | 'blue' | 'success' | 'warning' | 'error'
-> = {
-  minor: 'neutral',
-  major: 'warning',
-  critical: 'error',
 };
 
 const inputCls =
@@ -176,10 +117,9 @@ function ModLink({ to, children }: { to: string; children: ReactNode }) {
 
 /**
  * Explains, in one glance, what the fleet register does and how it connects to
- * the rest of the platform: readings and inspections keep an asset assignable,
- * crews pick it up in Resources, its running cost lands in Finance, and at
- * handover it moves to the building Asset Register. The founder's ask is that
- * every module make its integrations obvious, so each is a link.
+ * the rest of the platform: register a machine, log its meter readings, then
+ * assign it to a crew in Resources. The founder's ask is that every module
+ * make its integrations obvious, so the connection is a link.
  */
 function HowEquipmentWorks() {
   const { t } = useTranslation();
@@ -196,28 +136,14 @@ function HowEquipmentWorks() {
       icon: <Gauge size={14} className="text-oe-blue" />,
       title: t('equipment.flow_2_title', { defaultValue: 'Log readings' }),
       desc: t('equipment.flow_2_desc', {
-        defaultValue: 'Record hour-meter, odometer and fuel readings to track real utilisation.',
-      }),
-    },
-    {
-      icon: <Wrench size={14} className="text-oe-blue" />,
-      title: t('equipment.flow_3_title', { defaultValue: 'Maintain' }),
-      desc: t('equipment.flow_3_desc', {
-        defaultValue: 'Raise and close work orders; a reading can auto-raise one when service is due.',
-      }),
-    },
-    {
-      icon: <ShieldCheck size={14} className="text-oe-blue" />,
-      title: t('equipment.flow_4_title', { defaultValue: 'Certify' }),
-      desc: t('equipment.flow_4_desc', {
-        defaultValue: 'Keep statutory inspections current; a lapsed one blocks new assignments.',
+        defaultValue: 'Record hour-meter and odometer readings to track real utilisation.',
       }),
     },
     {
       icon: <Users size={14} className="text-oe-blue" />,
-      title: t('equipment.flow_5_title', { defaultValue: 'Assign & cost' }),
-      desc: t('equipment.flow_5_desc', {
-        defaultValue: 'Assign active plant to crews; its running cost flows through to Finance.',
+      title: t('equipment.flow_3_title', { defaultValue: 'Assign' }),
+      desc: t('equipment.flow_3_desc', {
+        defaultValue: 'Assign active plant to crews from the Resources module.',
       }),
     },
   ];
@@ -231,7 +157,7 @@ function HowEquipmentWorks() {
       <p className="text-xs text-content-tertiary">
         {t('equipment.flow_intro', {
           defaultValue:
-            'The register keeps every machine safe, serviced and costed. Only active plant with a valid inspection can be assigned to a crew.',
+            'The register keeps every machine and its running hours in one place, ready to assign to a crew.',
         })}
       </p>
 
@@ -380,8 +306,7 @@ export function EquipmentPage() {
       <PageHeader
         srTitle={t('equipment.title', { defaultValue: 'Equipment & Fleet' })}
         subtitle={t('equipment.subtitle', {
-          defaultValue:
-            'Track equipment assets, utilization, maintenance and certifications.',
+          defaultValue: 'Track equipment assets and utilization.',
         })}
         actions={
           <>
@@ -436,7 +361,7 @@ export function EquipmentPage() {
       >
         {t('equipment.intro_body', {
           defaultValue:
-            'Register every owned, rented or leased machine, then open an asset to see utilisation, month-to-date fuel cost, open maintenance work orders and certification expiry. An asset that is not active, or whose required inspection has lapsed, is automatically blocked from new resource assignments, and its running cost flows through to Finance.',
+            'Register every owned, rented or leased machine, then open an asset to see its hour meter, odometer and telemetry history.',
         })}
       </DismissibleInfo>
 
@@ -486,10 +411,6 @@ export function EquipmentPage() {
         <TypesPage />
       ) : (
       <>
-      <FleetOptimizationPanel
-        currency={fleetCurrency}
-        onSelect={setSelectedId}
-      />
       <div className="flex flex-wrap items-center gap-2">
         <div className="relative flex-1 min-w-[200px] max-w-md">
           <Search
@@ -725,7 +646,6 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const navigate = useNavigate();
   const qc = useQueryClient();
   const addToast = useToastStore((s) => s.addToast);
-  const [tab, setTab] = useState<DrawerTab>('utilization');
   // Edit + delete UI state — both gated to the loaded equipment so the
   // header buttons can't fire stale operations against a different id.
   const [editOpen, setEditOpen] = useState(false);
@@ -742,16 +662,6 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
     queryFn: () => getEquipment(id),
   });
   const eq = eqQ.data;
-
-  // Per-unit KPI rollup (utilization %, fuel cost MTD, open work orders,
-  // expiring inspections, and the assignment-blocked flag). These are
-  // computed server-side but were never surfaced — most importantly the
-  // `blocked` state, which is invisible to dispatchers without this.
-  const dashQ = useQuery({
-    queryKey: ['equipment', 'unitDashboard', id],
-    queryFn: () => getEquipmentDashboard(id),
-    enabled: !!eq,
-  });
 
   // Close on Escape — symmetric with EquipmentFormModal so keyboard
   // users get a predictable dismissal. Skipped while a destructive
@@ -787,8 +697,8 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
         }),
       });
       // Invalidate every cached query that referenced this asset so the
-      // list page, the dashboard and any open child drawers (telemetry,
-      // work orders, inspections, damage) drop their stale rows.
+      // list page and any open child drawers (telemetry) drop their stale
+      // rows.
       qc.invalidateQueries({ queryKey: ['equipment'] });
       setDeleteOpen(false);
       onClose();
@@ -802,25 +712,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const telemetryQ = useQuery({
     queryKey: ['equipment', 'telemetry', id],
     queryFn: () => listTelemetry(id, { limit: 50 }),
-    enabled: !!id && tab === 'utilization',
-  });
-
-  const wosQ = useQuery({
-    queryKey: ['equipment', 'workOrders', id],
-    queryFn: () => listMaintenanceWorkOrders({ equipment_id: id }),
-    enabled: !!id && tab === 'maintenance',
-  });
-
-  const insQ = useQuery({
-    queryKey: ['equipment', 'inspections', id],
-    queryFn: () => listInspections(id),
-    enabled: !!id && tab === 'certifications',
-  });
-
-  const damQ = useQuery({
-    queryKey: ['equipment', 'damage', id],
-    queryFn: () => listDamageReports({ equipment_id: id }),
-    enabled: !!id && tab === 'damage',
+    enabled: !!id,
   });
 
   return (
@@ -971,125 +863,12 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
               />
             </div>
 
-            {dashQ.data?.blocked && (
-              <div
-                role="alert"
-                className="mx-5 mt-3 flex items-start gap-2 rounded-lg border border-status-error/30 bg-status-error/10 px-3 py-2 text-xs text-status-error"
-              >
-                <AlertTriangle size={14} className="mt-0.5 shrink-0" />
-                <span>
-                  {t('equipment.blocked_banner', {
-                    defaultValue:
-                      'This unit is blocked from new assignments - its status is not active or a required inspection has expired.',
-                  })}{' '}
-                  <button
-                    type="button"
-                    onClick={() => navigate('/resources')}
-                    className="font-medium underline underline-offset-2 hover:no-underline"
-                  >
-                    {t('equipment.blocked_banner_resources_link', {
-                      defaultValue: 'Review crew assignments in Resources',
-                    })}
-                  </button>
-                </span>
-              </div>
-            )}
-
-            <div className="border-b border-border-light px-5">
-              <nav className="flex gap-1 -mb-px">
-                {(
-                  [
-                    {
-                      id: 'utilization',
-                      label: t('equipment.tab_utilization', {
-                        defaultValue: 'Utilization',
-                      }),
-                      icon: Activity,
-                    },
-                    {
-                      id: 'health',
-                      label: t('equipment.tab_health', {
-                        defaultValue: 'Health & Analytics',
-                      }),
-                      icon: HeartPulse,
-                    },
-                    {
-                      id: 'maintenance',
-                      label: t('equipment.tab_maintenance', {
-                        defaultValue: 'Maintenance',
-                      }),
-                      icon: Wrench,
-                    },
-                    {
-                      id: 'certifications',
-                      label: t('equipment.tab_certifications', {
-                        defaultValue: 'Certifications',
-                      }),
-                      icon: ShieldCheck,
-                    },
-                    {
-                      id: 'damage',
-                      label: t('equipment.tab_damage', {
-                        defaultValue: 'Damage',
-                      }),
-                      icon: AlertTriangle,
-                    },
-                  ] as { id: DrawerTab; label: string; icon: React.ElementType }[]
-                ).map((ti) => {
-                  const Icon = ti.icon;
-                  return (
-                    <button
-                      key={ti.id}
-                      type="button"
-                      onClick={() => setTab(ti.id)}
-                      className={clsx(
-                        'flex items-center gap-2 px-3 py-2.5 text-xs font-medium border-b-2 transition-colors',
-                        tab === ti.id
-                          ? 'border-oe-blue text-oe-blue'
-                          : 'border-transparent text-content-secondary hover:text-content-primary',
-                      )}
-                    >
-                      <Icon size={12} />
-                      {ti.label}
-                    </button>
-                  );
-                })}
-              </nav>
-            </div>
-
             <div className="p-5 space-y-3">
-              {tab === 'utilization' && (
-                <UtilizationTab
-                  equipment={eq}
-                  telemetry={telemetryQ.data ?? []}
-                  loading={telemetryQ.isLoading}
-                  dashboard={dashQ.data ?? null}
-                />
-              )}
-              {tab === 'health' && (
-                <EquipmentHealthDashboard equipmentId={eq.id} />
-              )}
-              {tab === 'maintenance' && (
-                <MaintenanceTab
-                  equipmentId={eq.id}
-                  rows={wosQ.data ?? []}
-                  loading={wosQ.isLoading}
-                />
-              )}
-              {tab === 'certifications' && (
-                <CertificationsTab
-                  equipmentId={eq.id}
-                  rows={insQ.data ?? []}
-                  loading={insQ.isLoading}
-                />
-              )}
-              {tab === 'damage' && (
-                <DamageTab
-                  equipmentId={eq.id}
-                  rows={damQ.data ?? []}
-                  loading={damQ.isLoading}
-                />
-              )}
+              <UtilizationTab
+                equipment={eq}
+                telemetry={telemetryQ.data ?? []}
+                loading={telemetryQ.isLoading}
+              />
             </div>
           </>
         )}
@@ -1117,7 +896,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
           eq
             ? t('equipment.delete_message', {
                 defaultValue:
-                  'Delete "{{name}}" ({{code}})? This removes all telemetry, work orders, inspections and damage reports linked to this asset. This action cannot be undone.',
+                  'Delete "{{name}}" ({{code}})? This removes all telemetry linked to this asset. This action cannot be undone.',
                 name: eq.name,
                 code: eq.code,
               })
@@ -1173,68 +952,14 @@ function SectionHeader({
   );
 }
 
-/* ── Hover-revealed row action icons (Pencil + Trash) ─────────────────── */
-
-function RowActions({
-  onEdit,
-  onDelete,
-  editLabel,
-  deleteLabel,
-}: {
-  onEdit?: () => void;
-  onDelete?: () => void;
-  editLabel: string;
-  deleteLabel: string;
-}) {
-  return (
-    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-      {onEdit && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onEdit();
-          }}
-          className="rounded p-1 text-content-tertiary hover:text-oe-blue hover:bg-oe-blue/10"
-          aria-label={editLabel}
-          title={editLabel}
-        >
-          <Pencil size={12} />
-        </button>
-      )}
-      {onDelete && (
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete();
-          }}
-          className="rounded p-1 text-content-tertiary hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"
-          aria-label={deleteLabel}
-          title={deleteLabel}
-        >
-          <Trash2 size={12} />
-        </button>
-      )}
-    </div>
-  );
-}
-
 function UtilizationTab({
   equipment,
   telemetry,
   loading,
-  dashboard,
 }: {
   equipment: Equipment;
   telemetry: { id: string; recorded_at: string; fuel_level?: number | string | null; hour_meter?: number | string | null; odometer_km?: number | string | null; engine_status?: string | null }[];
   loading: boolean;
-  dashboard: {
-    utilization_pct: number;
-    fuel_cost_mtd: number | string;
-    open_work_orders: number;
-    expiring_inspections: number;
-  } | null;
 }) {
   const { t } = useTranslation();
   const qc = useQueryClient();
@@ -1247,61 +972,13 @@ function UtilizationTab({
           defaultValue: 'Utilization & telemetry',
         })}
         tooltip={t('equipment.utilization.tooltip', {
-          defaultValue:
-            'Live hour-meter, odometer and fuel-level readings. Each new reading rolls forward the asset state and can auto-fire a maintenance work order when a schedule is within 50 hours of due.',
+          defaultValue: 'Hour-meter, odometer and fuel-level readings logged for this asset.',
         })}
         addLabel={t('equipment.utilization.add_meter', {
           defaultValue: 'Log meter reading',
         })}
         onAdd={() => setMeterOpen(true)}
       />
-      {dashboard && (
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          <Card padding="sm">
-            <p className="text-xs text-content-tertiary">
-              {t('equipment.utilization_mtd', {
-                defaultValue: 'Utilization (MTD)',
-              })}
-            </p>
-            <p className="mt-1 text-lg font-semibold tabular-nums">
-              {fmtPercent(dashboard.utilization_pct, 0)}
-            </p>
-          </Card>
-          <Card padding="sm">
-            <p className="text-xs text-content-tertiary">
-              {t('equipment.fuel_cost_mtd', {
-                defaultValue: 'Fuel cost (MTD)',
-              })}
-            </p>
-            <p className="mt-1 text-lg font-semibold tabular-nums">
-              <MoneyDisplay
-                amount={toNum(dashboard.fuel_cost_mtd)}
-                currency={equipment.currency || undefined}
-              />
-            </p>
-          </Card>
-          <Card padding="sm">
-            <p className="text-xs text-content-tertiary">
-              {t('equipment.open_work_orders', {
-                defaultValue: 'Open work orders',
-              })}
-            </p>
-            <p className="mt-1 text-lg font-semibold tabular-nums">
-              {dashboard.open_work_orders}
-            </p>
-          </Card>
-          <Card padding="sm">
-            <p className="text-xs text-content-tertiary">
-              {t('equipment.expiring_inspections', {
-                defaultValue: 'Expiring inspections',
-              })}
-            </p>
-            <p className="mt-1 text-lg font-semibold tabular-nums">
-              {dashboard.expiring_inspections}
-            </p>
-          </Card>
-        </div>
-      )}
       <div className="grid grid-cols-3 gap-2">
         <Card padding="sm">
           <p className="text-xs text-content-tertiary">
@@ -1586,525 +1263,6 @@ function MeterReadingModal({
   );
 }
 
-function MaintenanceTab({
-  equipmentId,
-  rows,
-  loading,
-}: {
-  equipmentId: string;
-  rows: ApiWorkOrder[];
-  loading: boolean;
-}) {
-  const { t } = useTranslation();
-  const qc = useQueryClient();
-  const addToast = useToastStore((s) => s.addToast);
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editing, setEditing] = useState<ApiWorkOrder | null>(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-
-  const invalidate = () =>
-    qc.invalidateQueries({ queryKey: ['equipment', 'workOrders', equipmentId] });
-
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteWorkOrder(id);
-      addToast({
-        type: 'success',
-        title: t('equipment.workorder.deleted', {
-          defaultValue: 'Work order deleted',
-        }),
-      });
-      invalidate();
-    } catch (err) {
-      addToast({ type: 'error', title: getErrorMessage(err) });
-    } finally {
-      setConfirmDeleteId(null);
-    }
-  };
-
-  const handleComplete = async (id: string) => {
-    try {
-      await completeWorkOrder(id);
-      addToast({
-        type: 'success',
-        title: t('equipment.workorder.completed', {
-          defaultValue: 'Work order completed',
-        }),
-      });
-      invalidate();
-    } catch (err) {
-      addToast({ type: 'error', title: getErrorMessage(err) });
-    }
-  };
-
-  return (
-    <div className="space-y-3">
-      <SectionHeader
-        title={t('equipment.workorder.section_title', {
-          defaultValue: 'Maintenance work orders',
-        })}
-        tooltip={t('equipment.workorder.tooltip', {
-          defaultValue:
-            'Scheduled, in-progress and completed work orders against this asset. Costs roll up into project Finance via the active rental.',
-        })}
-        addLabel={t('equipment.workorder.add', { defaultValue: 'Add work order' })}
-        onAdd={() => setCreateOpen(true)}
-      />
-
-      {loading && <SkeletonTable rows={4} columns={4} />}
-      {!loading && rows.length === 0 && (
-        <EmptyState
-          icon={<Wrench size={20} />}
-          title={t('equipment.no_workorders', {
-            defaultValue: 'No maintenance work orders',
-          })}
-        />
-      )}
-      {!loading && rows.length > 0 && (
-        <div className="overflow-x-auto rounded-lg border border-border-light">
-          <table className="w-full text-xs">
-            <thead className="bg-surface-secondary text-content-tertiary uppercase tracking-wide">
-              <tr>
-                <th className="px-3 py-2 text-left">
-                  {t('equipment.scheduled_for', { defaultValue: 'Scheduled' })}
-                </th>
-                <th className="px-3 py-2 text-left">
-                  {t('equipment.technician', { defaultValue: 'Technician' })}
-                </th>
-                <th className="px-3 py-2 text-left">
-                  {t('equipment.summary', { defaultValue: 'Summary' })}
-                </th>
-                <th className="px-3 py-2 text-right">
-                  {t('equipment.cost', { defaultValue: 'Cost' })}
-                </th>
-                <th className="px-3 py-2 text-left">
-                  {t('equipment.col_status', { defaultValue: 'Status' })}
-                </th>
-                <th className="px-3 py-2 w-[88px]" />
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => (
-                <tr
-                  key={r.id}
-                  className="group border-t border-border-light hover:bg-surface-secondary"
-                >
-                  <td className="px-3 py-2 text-content-secondary">
-                    {r.scheduled_for ? <DateDisplay value={r.scheduled_for} /> : '—'}
-                  </td>
-                  <td className="px-3 py-2 text-content-secondary">
-                    {r.technician_id || '—'}
-                  </td>
-                  <td className="px-3 py-2 truncate max-w-[200px]">
-                    {r.work_summary || '—'}
-                  </td>
-                  <td className="px-3 py-2 text-right">
-                    <MoneyDisplay
-                      amount={toNum(r.cost)}
-                      currency={r.currency || undefined}
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <Badge variant={WO_STATUS_VARIANT[r.status]} dot>
-                      {r.status}
-                    </Badge>
-                  </td>
-                  <td className="px-3 py-2">
-                    <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                      {(r.status === 'scheduled' || r.status === 'in_progress') && (
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            void handleComplete(r.id);
-                          }}
-                          className="rounded p-1 text-content-tertiary hover:text-green-600 hover:bg-green-50 dark:hover:bg-green-950/30"
-                          aria-label={t('equipment.workorder.complete', {
-                            defaultValue: 'Mark complete',
-                          })}
-                          title={t('equipment.workorder.complete', {
-                            defaultValue: 'Mark complete',
-                          })}
-                        >
-                          <ShieldCheck size={12} />
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditing(r);
-                        }}
-                        className="rounded p-1 text-content-tertiary hover:text-oe-blue hover:bg-oe-blue/10"
-                        aria-label={t('common.edit', { defaultValue: 'Edit' })}
-                        title={t('common.edit', { defaultValue: 'Edit' })}
-                      >
-                        <Pencil size={12} />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setConfirmDeleteId(r.id);
-                        }}
-                        className="rounded p-1 text-content-tertiary hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30"
-                        aria-label={t('common.delete', { defaultValue: 'Delete' })}
-                        title={t('common.delete', { defaultValue: 'Delete' })}
-                      >
-                        <Trash2 size={12} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {createOpen && (
-        <WorkOrderFormModal
-          mode="create"
-          equipmentId={equipmentId}
-          onClose={() => setCreateOpen(false)}
-          onSaved={invalidate}
-        />
-      )}
-      {editing && (
-        <WorkOrderFormModal
-          mode="edit"
-          equipmentId={equipmentId}
-          existing={editing}
-          onClose={() => setEditing(null)}
-          onSaved={invalidate}
-        />
-      )}
-      <ConfirmDialog
-        open={confirmDeleteId !== null}
-        title={t('equipment.workorder.delete_title', {
-          defaultValue: 'Delete work order?',
-        })}
-        message={t('equipment.workorder.delete_message', {
-          defaultValue:
-            'This permanently deletes the work order and its parts log links.',
-        })}
-        variant="danger"
-        onConfirm={() => confirmDeleteId && handleDelete(confirmDeleteId)}
-        onCancel={() => setConfirmDeleteId(null)}
-      />
-    </div>
-  );
-}
-
-function CertificationsTab({
-  equipmentId,
-  rows,
-  loading,
-}: {
-  equipmentId: string;
-  rows: ApiInspection[];
-  loading: boolean;
-}) {
-  const { t } = useTranslation();
-  const qc = useQueryClient();
-  const addToast = useToastStore((s) => s.addToast);
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editing, setEditing] = useState<ApiInspection | null>(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-
-  const invalidate = () =>
-    qc.invalidateQueries({ queryKey: ['equipment', 'inspections', equipmentId] });
-
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteInspection(id);
-      addToast({
-        type: 'success',
-        title: t('equipment.inspection.deleted', {
-          defaultValue: 'Inspection deleted',
-        }),
-      });
-      invalidate();
-    } catch (err) {
-      addToast({ type: 'error', title: getErrorMessage(err) });
-    } finally {
-      setConfirmDeleteId(null);
-    }
-  };
-
-  const today = new Date().toISOString().slice(0, 10);
-  return (
-    <div className="space-y-3">
-      <SectionHeader
-        title={t('equipment.inspection.section_title', {
-          defaultValue: 'Inspections & certifications',
-        })}
-        tooltip={t('equipment.inspection.tooltip', {
-          defaultValue:
-            'Statutory inspections, lift certificates, annual safety checks. If the latest valid-until date has passed, the asset is automatically blocked from new project assignments.',
-        })}
-        addLabel={t('equipment.inspection.add', {
-          defaultValue: 'Add inspection',
-        })}
-        onAdd={() => setCreateOpen(true)}
-      />
-
-      {loading && <SkeletonTable rows={3} columns={4} />}
-      {!loading && rows.length === 0 && (
-        <EmptyState
-          icon={<ShieldCheck size={20} />}
-          title={t('equipment.no_certifications', {
-            defaultValue: 'No inspections recorded',
-          })}
-        />
-      )}
-      {!loading && rows.length > 0 && (
-        <div className="overflow-x-auto rounded-lg border border-border-light">
-          <table className="w-full text-xs">
-            <thead className="bg-surface-secondary text-content-tertiary uppercase tracking-wide">
-              <tr>
-                <th className="px-3 py-2 text-left">
-                  {t('equipment.inspection_type', { defaultValue: 'Type' })}
-                </th>
-                <th className="px-3 py-2 text-left">
-                  {t('equipment.inspected_at', { defaultValue: 'Inspected' })}
-                </th>
-                <th className="px-3 py-2 text-left">
-                  {t('equipment.valid_until', { defaultValue: 'Valid until' })}
-                </th>
-                <th className="px-3 py-2 text-left">
-                  {t('equipment.inspector', { defaultValue: 'Inspector' })}
-                </th>
-                <th className="px-3 py-2 text-left">
-                  {t('equipment.result', { defaultValue: 'Result' })}
-                </th>
-                <th className="px-3 py-2 w-[60px]" />
-              </tr>
-            </thead>
-            <tbody>
-              {rows.map((r) => {
-                const expired = r.valid_until < today;
-                return (
-                  <tr
-                    key={r.id}
-                    className="group border-t border-border-light hover:bg-surface-secondary"
-                  >
-                    <td className="px-3 py-2">{r.inspection_type}</td>
-                    <td className="px-3 py-2 text-content-secondary">
-                      <DateDisplay value={r.inspected_at} />
-                    </td>
-                    <td
-                      className={clsx(
-                        'px-3 py-2',
-                        expired
-                          ? 'text-status-error font-medium'
-                          : 'text-content-secondary',
-                      )}
-                    >
-                      <DateDisplay value={r.valid_until} />
-                      {expired && (
-                        <span className="ml-1 text-[10px] uppercase">
-                          {t('equipment.expired', { defaultValue: 'expired' })}
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-3 py-2 text-content-secondary">
-                      {r.inspector_name || '—'}
-                    </td>
-                    <td className="px-3 py-2">
-                      <Badge variant={INSPECTION_VARIANT[r.result]} dot>
-                        {r.result}
-                      </Badge>
-                    </td>
-                    <td className="px-3 py-2">
-                      <RowActions
-                        onEdit={() => setEditing(r)}
-                        onDelete={() => setConfirmDeleteId(r.id)}
-                        editLabel={t('common.edit', { defaultValue: 'Edit' })}
-                        deleteLabel={t('common.delete', {
-                          defaultValue: 'Delete',
-                        })}
-                      />
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
-      )}
-
-      {createOpen && (
-        <InspectionFormModal
-          mode="create"
-          equipmentId={equipmentId}
-          onClose={() => setCreateOpen(false)}
-          onSaved={invalidate}
-        />
-      )}
-      {editing && (
-        <InspectionFormModal
-          mode="edit"
-          equipmentId={equipmentId}
-          existing={editing}
-          onClose={() => setEditing(null)}
-          onSaved={invalidate}
-        />
-      )}
-      <ConfirmDialog
-        open={confirmDeleteId !== null}
-        title={t('equipment.inspection.delete_title', {
-          defaultValue: 'Delete inspection?',
-        })}
-        message={t('equipment.inspection.delete_message', {
-          defaultValue:
-            'This permanently removes the inspection record. The asset compliance status will recompute against the remaining inspections.',
-        })}
-        variant="danger"
-        onConfirm={() => confirmDeleteId && handleDelete(confirmDeleteId)}
-        onCancel={() => setConfirmDeleteId(null)}
-      />
-    </div>
-  );
-}
-
-function DamageTab({
-  equipmentId,
-  rows,
-  loading,
-}: {
-  equipmentId: string;
-  rows: ApiDamage[];
-  loading: boolean;
-}) {
-  const { t } = useTranslation();
-  const qc = useQueryClient();
-  const addToast = useToastStore((s) => s.addToast);
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editing, setEditing] = useState<ApiDamage | null>(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-
-  const invalidate = () =>
-    qc.invalidateQueries({ queryKey: ['equipment', 'damage', equipmentId] });
-
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteDamageReport(id);
-      addToast({
-        type: 'success',
-        title: t('equipment.damage.deleted', {
-          defaultValue: 'Damage report deleted',
-        }),
-      });
-      invalidate();
-    } catch (err) {
-      addToast({ type: 'error', title: getErrorMessage(err) });
-    } finally {
-      setConfirmDeleteId(null);
-    }
-  };
-
-  return (
-    <div className="space-y-3">
-      <SectionHeader
-        title={t('equipment.damage.section_title', {
-          defaultValue: 'Damage & incident reports',
-        })}
-        tooltip={t('equipment.damage.tooltip', {
-          defaultValue:
-            'Damage records, severity and repair-cost estimates. Filing a new report automatically creates a linked maintenance work order so the repair is tracked.',
-        })}
-        addLabel={t('equipment.damage.add', { defaultValue: 'Report damage' })}
-        onAdd={() => setCreateOpen(true)}
-      />
-
-      {loading && <SkeletonTable rows={3} columns={4} />}
-      {!loading && rows.length === 0 && (
-        <EmptyState
-          icon={<AlertTriangle size={20} />}
-          title={t('equipment.no_damage', { defaultValue: 'No damage reports' })}
-        />
-      )}
-      {!loading &&
-        rows.length > 0 &&
-        rows.map((r) => (
-          <Card key={r.id} padding="sm" className="group">
-            <div className="flex items-start justify-between gap-3">
-              <div className="min-w-0 flex-1">
-                <p className="text-xs text-content-tertiary">
-                  <DateDisplay value={r.reported_at} />
-                </p>
-                <p className="mt-1 text-sm text-content-primary whitespace-pre-wrap">
-                  {r.description || '—'}
-                </p>
-              </div>
-              <div className="flex flex-col items-end gap-1">
-                <Badge variant={DAMAGE_VARIANT[r.severity]} dot>
-                  {r.severity}
-                </Badge>
-                <Badge variant="neutral">{r.status}</Badge>
-              </div>
-            </div>
-            <div className="mt-2 flex items-center justify-between gap-2">
-              {r.repair_cost_estimate !== null &&
-              r.repair_cost_estimate !== undefined ? (
-                <p className="text-xs text-content-secondary">
-                  {t('equipment.repair_estimate', {
-                    defaultValue: 'Repair estimate',
-                  })}
-                  :{' '}
-                  <MoneyDisplay
-                    amount={toNum(r.repair_cost_estimate)}
-                    currency={r.currency || undefined}
-                  />
-                </p>
-              ) : (
-                <span />
-              )}
-              <RowActions
-                onEdit={() => setEditing(r)}
-                onDelete={() => setConfirmDeleteId(r.id)}
-                editLabel={t('common.edit', { defaultValue: 'Edit' })}
-                deleteLabel={t('common.delete', { defaultValue: 'Delete' })}
-              />
-            </div>
-          </Card>
-        ))}
-
-      {createOpen && (
-        <DamageReportFormModal
-          mode="create"
-          equipmentId={equipmentId}
-          onClose={() => setCreateOpen(false)}
-          onSaved={invalidate}
-        />
-      )}
-      {editing && (
-        <DamageReportFormModal
-          mode="edit"
-          equipmentId={equipmentId}
-          existing={editing}
-          onClose={() => setEditing(null)}
-          onSaved={invalidate}
-        />
-      )}
-      <ConfirmDialog
-        open={confirmDeleteId !== null}
-        title={t('equipment.damage.delete_title', {
-          defaultValue: 'Delete damage report?',
-        })}
-        message={t('equipment.damage.delete_message', {
-          defaultValue:
-            'This permanently removes the damage record. The auto-created maintenance work order is kept; delete it separately if needed.',
-        })}
-        variant="danger"
-        onConfirm={() => confirmDeleteId && handleDelete(confirmDeleteId)}
-        onCancel={() => setConfirmDeleteId(null)}
-      />
-    </div>
-  );
-}
-
 function KV({ label, value }: { label: React.ReactNode; value: React.ReactNode }) {
   return (
     <div>
@@ -2118,41 +1276,22 @@ function KV({ label, value }: { label: React.ReactNode; value: React.ReactNode }
 
 /* ─── Types page — flat catalogue of EquipmentType ───────────────── */
 
+/**
+ * Read-only catalogue of equipment types. There is no create/edit/delete
+ * backend for types (only the list route exists), so this page shows the
+ * taxonomy without offering affordances that would silently fail.
+ */
 function TypesPage() {
   const { t } = useTranslation();
-  const qc = useQueryClient();
-  const addToast = useToastStore((s) => s.addToast);
-  const [createOpen, setCreateOpen] = useState(false);
-  const [editing, setEditing] = useState<ApiEquipmentType | null>(null);
-  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
 
   const typesQ = useQuery({
     queryKey: ['equipment', 'types'],
     queryFn: () => listTypes(),
   });
 
-  const invalidate = () => qc.invalidateQueries({ queryKey: ['equipment', 'types'] });
-
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteType(id);
-      addToast({
-        type: 'success',
-        title: t('equipment.type.deleted', { defaultValue: 'Type deleted' }),
-      });
-      invalidate();
-    } catch (err) {
-      // 409 from server when the type is still referenced — show the
-      // detail so the user knows which assets are blocking deletion.
-      addToast({ type: 'error', title: getErrorMessage(err) });
-    } finally {
-      setConfirmDeleteId(null);
-    }
-  };
-
   /* No truncation notice here on purpose: the route reads the whole taxonomy
      in one query, so `total` can never exceed what `items` already holds. */
-  const rows = typesQ.data?.items ?? [];
+  const rows: ApiEquipmentType[] = typesQ.data?.items ?? [];
 
   return (
     <div className="space-y-3">
@@ -2168,20 +1307,13 @@ function TypesPage() {
             className="inline-flex items-center justify-center rounded-full p-0.5 text-content-tertiary hover:text-oe-blue hover:bg-oe-blue/10"
             title={t('equipment.type.page_tooltip', {
               defaultValue:
-                'Catalogue of equipment categories used to classify assets (excavator, crane, generator, …). Each asset references a type by code, so a type cannot be deleted while any asset still uses it.',
+                'Reference list of equipment categories used to classify assets (excavator, crane, generator, …). Each asset references a type by code. This catalogue is read-only.',
             })}
             aria-label={t('common.info', { defaultValue: 'Info' })}
           >
             <Info size={13} strokeWidth={2} />
           </button>
         </div>
-        <Button
-          variant="primary"
-          icon={<Plus size={14} />}
-          onClick={() => setCreateOpen(true)}
-        >
-          {t('equipment.type.add', { defaultValue: 'New type' })}
-        </Button>
       </div>
 
       <Card padding="none">
@@ -2209,14 +1341,6 @@ function TypesPage() {
             title={t('equipment.type.empty', {
               defaultValue: 'No equipment types yet',
             })}
-            description={t('equipment.type.empty_desc', {
-              defaultValue:
-                'Define the categories you use to classify assets (excavator, crane, generator, …). Types drive default service intervals and inspection cadence.',
-            })}
-            action={{
-              label: t('equipment.type.add', { defaultValue: 'New type' }),
-              onClick: () => setCreateOpen(true),
-            }}
           />
         ) : (
           <div className="overflow-x-auto">
@@ -2232,31 +1356,17 @@ function TypesPage() {
                   <th className="px-4 py-2.5 text-left">
                     {t('equipment.type.category', { defaultValue: 'Category' })}
                   </th>
-                  <th className="px-4 py-2.5 w-[80px]" />
                 </tr>
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr
-                    key={r.id}
-                    className="group border-t border-border-light hover:bg-surface-secondary"
-                  >
+                  <tr key={r.id} className="border-t border-border-light">
                     <td className="px-4 py-2 font-mono text-xs text-content-secondary">
                       {r.code}
                     </td>
                     <td className="px-4 py-2 text-content-primary">{r.name}</td>
                     <td className="px-4 py-2 text-content-secondary text-xs">
                       {r.category}
-                    </td>
-                    <td className="px-4 py-2">
-                      <RowActions
-                        onEdit={() => setEditing(r)}
-                        onDelete={() => setConfirmDeleteId(r.id)}
-                        editLabel={t('common.edit', { defaultValue: 'Edit' })}
-                        deleteLabel={t('common.delete', {
-                          defaultValue: 'Delete',
-                        })}
-                      />
                     </td>
                   </tr>
                 ))}
@@ -2265,35 +1375,6 @@ function TypesPage() {
           </div>
         )}
       </Card>
-
-      {createOpen && (
-        <TypeFormModal
-          mode="create"
-          onClose={() => setCreateOpen(false)}
-          onSaved={invalidate}
-        />
-      )}
-      {editing && (
-        <TypeFormModal
-          mode="edit"
-          existing={editing}
-          onClose={() => setEditing(null)}
-          onSaved={invalidate}
-        />
-      )}
-      <ConfirmDialog
-        open={confirmDeleteId !== null}
-        title={t('equipment.type.delete_title', {
-          defaultValue: 'Delete equipment type?',
-        })}
-        message={t('equipment.type.delete_message', {
-          defaultValue:
-            'Delete this type? Equipment that references it must be reassigned first.',
-        })}
-        variant="danger"
-        onConfirm={() => confirmDeleteId && handleDelete(confirmDeleteId)}
-        onCancel={() => setConfirmDeleteId(null)}
-      />
     </div>
   );
 }
