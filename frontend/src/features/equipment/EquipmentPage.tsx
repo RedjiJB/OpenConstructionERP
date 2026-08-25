@@ -15,7 +15,6 @@ import {
   AlertTriangle,
   MapPin,
   Pencil,
-  Trash2,
   Save,
   Info,
   Tags,
@@ -31,7 +30,6 @@ import {
   EmptyState,
   Breadcrumb,
   SkeletonTable,
-  ConfirmDialog,
   DismissibleInfo,
   IntroRichText,
   ModuleGuideButton,
@@ -48,9 +46,7 @@ import {
   getEquipment,
   createEquipment,
   updateEquipment,
-  deleteEquipment,
   listTelemetry,
-  recordTelemetry,
   listTypes,
   type Equipment,
   type EquipmentStatus,
@@ -644,13 +640,13 @@ function AssetTable({
 function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const qc = useQueryClient();
-  const addToast = useToastStore((s) => s.addToast);
-  // Edit + delete UI state — both gated to the loaded equipment so the
-  // header buttons can't fire stale operations against a different id.
+  // Edit UI state — gated to the loaded equipment so the header button
+  // can't fire a stale operation against a different id. There is no
+  // DELETE route for equipment (see the façade's equipment route header:
+  // hard-deleting a vehicle with existing trips/telemetry rows has real
+  // FK-cascade risk and no clear domain semantic), so no delete control
+  // is offered here.
   const [editOpen, setEditOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
-  const [deleting, setDeleting] = useState(false);
 
   // Fetch the single record via the dedicated endpoint. The previous
   // implementation listed up to 500 units and `.find()`-ed the row, which
@@ -664,50 +660,18 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
   const eq = eqQ.data;
 
   // Close on Escape — symmetric with EquipmentFormModal so keyboard
-  // users get a predictable dismissal. Skipped while a destructive
-  // confirm/delete is in flight so we don't tear the drawer out from
-  // under an in-progress request, and while a child modal is open
-  // (that modal handles its own Escape).
+  // users get a predictable dismissal. Skipped while a child modal is
+  // open (that modal handles its own Escape).
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (
-        e.key === 'Escape' &&
-        !deleting &&
-        !editOpen &&
-        !deleteOpen
-      ) {
+      if (e.key === 'Escape' && !editOpen) {
         e.preventDefault();
         onClose();
       }
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
-  }, [deleting, editOpen, deleteOpen, onClose]);
-
-  const handleDelete = async () => {
-    if (!eq) return;
-    setDeleting(true);
-    try {
-      await deleteEquipment(eq.id);
-      addToast({
-        type: 'success',
-        title: t('equipment.deleted', {
-          defaultValue: '{{name}} deleted',
-          name: eq.name,
-        }),
-      });
-      // Invalidate every cached query that referenced this asset so the
-      // list page and any open child drawers (telemetry) drop their stale
-      // rows.
-      qc.invalidateQueries({ queryKey: ['equipment'] });
-      setDeleteOpen(false);
-      onClose();
-    } catch (err) {
-      addToast({ type: 'error', title: getErrorMessage(err) });
-    } finally {
-      setDeleting(false);
-    }
-  };
+  }, [editOpen, onClose]);
 
   const telemetryQ = useQuery({
     queryKey: ['equipment', 'telemetry', id],
@@ -740,7 +704,7 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
               <p className="text-xs text-content-tertiary">SN: {eq.serial}</p>
             )}
           </div>
-          {/* Action toolbar — Edit + Delete + Close. Disabled while the
+          {/* Action toolbar — Edit + Close. Disabled while the
               equipment is still loading so the buttons cannot fire
               against an undefined id. Each control is its own
               accessible button with aria-label rather than a tooltip-
@@ -774,19 +738,6 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
             >
               <Pencil size={12} />
               {t('common.edit', { defaultValue: 'Edit' })}
-            </button>
-            <button
-              type="button"
-              onClick={() => setDeleteOpen(true)}
-              disabled={!eq}
-              className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1.5 text-xs font-medium text-content-secondary hover:text-rose-600 hover:border-rose-300 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label={t('common.delete', { defaultValue: 'Delete' })}
-              title={t('equipment.delete_hint', {
-                defaultValue: 'Permanently remove this asset',
-              })}
-            >
-              <Trash2 size={12} />
-              {t('common.delete', { defaultValue: 'Delete' })}
             </button>
             <button
               type="button"
@@ -884,47 +835,20 @@ function DetailDrawer({ id, onClose }: { id: string; onClose: () => void }) {
           onClose={() => setEditOpen(false)}
         />
       )}
-      {/* Delete confirmation — destructive action, intentionally requires
-          a second click. The danger-variant ConfirmDialog already
-          handles focus trapping + Escape. */}
-      <ConfirmDialog
-        open={deleteOpen}
-        title={t('equipment.delete_title', {
-          defaultValue: 'Delete equipment?',
-        })}
-        message={
-          eq
-            ? t('equipment.delete_message', {
-                defaultValue:
-                  'Delete "{{name}}" ({{code}})? This removes all telemetry linked to this asset. This action cannot be undone.',
-                name: eq.name,
-                code: eq.code,
-              })
-            : ''
-        }
-        confirmLabel={t('common.delete', { defaultValue: 'Delete' })}
-        cancelLabel={t('common.cancel', { defaultValue: 'Cancel' })}
-        variant="danger"
-        onConfirm={handleDelete}
-        onCancel={() => setDeleteOpen(false)}
-        loading={deleting}
-      />
     </div>
   );
 }
 
-/* ── Section header with tooltip + Add button ─────────────────────────── */
+/* ── Section header with tooltip, no write affordance -- this domain has
+   no POST telemetry route, so there is nothing for an "Add" button here
+   to call. See UtilizationTab below. ────────────────────────────────── */
 
 function SectionHeader({
   title,
   tooltip,
-  addLabel,
-  onAdd,
 }: {
   title: string;
   tooltip: string;
-  addLabel: string;
-  onAdd: () => void;
 }) {
   const { t } = useTranslation();
   return (
@@ -940,14 +864,6 @@ function SectionHeader({
           <Info size={13} strokeWidth={2} />
         </button>
       </div>
-      <button
-        type="button"
-        onClick={onAdd}
-        className="inline-flex items-center gap-1.5 rounded-md border border-border-light bg-surface-primary px-2.5 py-1 text-xs font-medium text-content-secondary hover:text-oe-blue-text hover:border-oe-blue hover:bg-oe-blue-subtle transition-colors"
-      >
-        <Plus size={12} />
-        {addLabel}
-      </button>
     </div>
   );
 }
@@ -962,9 +878,6 @@ function UtilizationTab({
   loading: boolean;
 }) {
   const { t } = useTranslation();
-  const qc = useQueryClient();
-  const addToast = useToastStore((s) => s.addToast);
-  const [meterOpen, setMeterOpen] = useState(false);
   return (
     <div className="space-y-3">
       <SectionHeader
@@ -974,10 +887,6 @@ function UtilizationTab({
         tooltip={t('equipment.utilization.tooltip', {
           defaultValue: 'Hour-meter, odometer and fuel-level readings logged for this asset.',
         })}
-        addLabel={t('equipment.utilization.add_meter', {
-          defaultValue: 'Log meter reading',
-        })}
-        onAdd={() => setMeterOpen(true)}
       />
       <div className="grid grid-cols-3 gap-2">
         <Card padding="sm">
@@ -1073,192 +982,6 @@ function UtilizationTab({
           </table>
         </div>
       )}
-      {meterOpen && (
-        <MeterReadingModal
-          equipmentId={equipment.id}
-          onClose={() => setMeterOpen(false)}
-          onSaved={() => {
-            qc.invalidateQueries({ queryKey: ['equipment'] });
-            addToast({
-              type: 'success',
-              title: t('equipment.telemetry.recorded', {
-                defaultValue: 'Reading recorded',
-              }),
-            });
-          }}
-        />
-      )}
-    </div>
-  );
-}
-
-/* ── MeterReadingModal — single-shot telemetry POST ─────────────────── */
-
-function MeterReadingModal({
-  equipmentId,
-  onClose,
-  onSaved,
-}: {
-  equipmentId: string;
-  onClose: () => void;
-  onSaved: () => void;
-}) {
-  const { t } = useTranslation();
-  const addToast = useToastStore((s) => s.addToast);
-  const [busy, setBusy] = useState(false);
-  const [recordedAt, setRecordedAt] = useState(() =>
-    new Date().toISOString().slice(0, 16),
-  );
-  const [hourMeter, setHourMeter] = useState('');
-  const [odometer, setOdometer] = useState('');
-  const [fuelLevel, setFuelLevel] = useState('');
-  const [engineStatus, setEngineStatus] = useState('');
-
-  useEffect(() => {
-    const h = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !busy) {
-        e.preventDefault();
-        onClose();
-      }
-    };
-    document.addEventListener('keydown', h, { capture: true });
-    return () =>
-      document.removeEventListener('keydown', h, { capture: true });
-  }, [busy, onClose]);
-
-  const submit = async () => {
-    setBusy(true);
-    try {
-      const toNumOpt = (v: string): number | undefined => {
-        if (v.trim() === '') return undefined;
-        const n = Number(v.replace(',', '.'));
-        return Number.isFinite(n) ? n : undefined;
-      };
-      await recordTelemetry(equipmentId, {
-        recorded_at: new Date(recordedAt).toISOString(),
-        hour_meter: toNumOpt(hourMeter),
-        odometer_km: toNumOpt(odometer),
-        fuel_level: toNumOpt(fuelLevel),
-        engine_status: engineStatus.trim() || undefined,
-      });
-      onSaved();
-      onClose();
-    } catch (err) {
-      addToast({ type: 'error', title: getErrorMessage(err) });
-    } finally {
-      setBusy(false);
-    }
-  };
-
-  return (
-    <div
-      className="fixed inset-0 z-[60] flex items-center justify-center p-3"
-      onClick={() => !busy && onClose()}
-      role="dialog"
-      aria-modal="true"
-    >
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
-      <div
-        className="relative w-full max-w-md rounded-xl bg-surface-elevated p-5 shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-content-primary">
-            {t('equipment.telemetry.new_title', {
-              defaultValue: 'Log meter reading',
-            })}
-          </h2>
-          <button
-            type="button"
-            onClick={onClose}
-            disabled={busy}
-            className="rounded p-1 hover:bg-surface-secondary disabled:opacity-50"
-            aria-label={t('common.close', { defaultValue: 'Close' })}
-          >
-            <X size={16} />
-          </button>
-        </div>
-        <div className="space-y-3">
-          <div>
-            <label className={labelCls}>
-              {t('equipment.telemetry.recorded_at', {
-                defaultValue: 'Recorded at',
-              })}
-            </label>
-            <input
-              type="datetime-local"
-              value={recordedAt}
-              onChange={(e) => setRecordedAt(e.target.value)}
-              className={inputCls}
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className={labelCls}>
-                {t('equipment.hour_meter', { defaultValue: 'Hour meter' })}
-              </label>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={hourMeter}
-                onChange={(e) => setHourMeter(e.target.value)}
-                className={inputCls}
-                placeholder="1234"
-              />
-            </div>
-            <div>
-              <label className={labelCls}>
-                {t('equipment.odometer', { defaultValue: 'Odometer (km)' })}
-              </label>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={odometer}
-                onChange={(e) => setOdometer(e.target.value)}
-                className={inputCls}
-                placeholder="42000"
-              />
-            </div>
-            <div>
-              <label className={labelCls}>
-                {t('equipment.fuel_level', { defaultValue: 'Fuel %' })}
-              </label>
-              <input
-                type="text"
-                inputMode="decimal"
-                value={fuelLevel}
-                onChange={(e) => setFuelLevel(e.target.value)}
-                className={inputCls}
-                placeholder="80"
-              />
-            </div>
-            <div>
-              <label className={labelCls}>
-                {t('equipment.engine_status', { defaultValue: 'Engine' })}
-              </label>
-              <input
-                value={engineStatus}
-                onChange={(e) => setEngineStatus(e.target.value)}
-                className={inputCls}
-                placeholder="idle, running, off"
-              />
-            </div>
-          </div>
-        </div>
-        <div className="flex justify-end gap-2 mt-5">
-          <Button variant="ghost" onClick={onClose} disabled={busy}>
-            {t('common.cancel', { defaultValue: 'Cancel' })}
-          </Button>
-          <Button
-            variant="primary"
-            onClick={submit}
-            loading={busy}
-            icon={busy ? <Loader2 size={14} /> : <Gauge size={14} />}
-          >
-            {t('common.save', { defaultValue: 'Save' })}
-          </Button>
-        </div>
-      </div>
     </div>
   );
 }

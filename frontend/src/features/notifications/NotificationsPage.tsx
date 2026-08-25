@@ -18,7 +18,7 @@
 
 import { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Bell,
@@ -47,10 +47,7 @@ import {
 import { PageHeader } from '@/shared/ui/PageHeader';
 import { DismissibleInfo, IntroRichText } from '@/shared/ui/DismissibleInfo';
 import { apiGet, apiPost, apiDelete, type Page } from '@/shared/lib/api';
-import { PreferencesTab } from './PreferencesTab';
 import { notificationsGuide } from './notificationsGuide';
-
-type Tab = 'inbox' | 'preferences';
 
 type IconCategory =
   | 'success'
@@ -127,40 +124,10 @@ type NotificationFilter = 'all' | 'unread' | 'read';
 export function NotificationsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const location = useLocation();
   const queryClient = useQueryClient();
 
-  // Notification settings are deep-linkable: the bell footer, the Settings
-  // page and the Integrations page can point a user at ?tab=preferences and
-  // land them straight on their routing matrix. The query param seeds the
-  // initial tab once; clicks after that are local state (read off
-  // location.search rather than useSearchParams so a single Router context
-  // drives the initial read).
-  const initialTab: Tab =
-    new URLSearchParams(location.search).get('tab') === 'preferences'
-      ? 'preferences'
-      : 'inbox';
-  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
   const [filter, setFilter] = useState<NotificationFilter>('all');
   const [page, setPage] = useState(0);
-
-  const selectTab = useCallback(
-    (tab: Tab) => {
-      setActiveTab(tab);
-      // Keep the URL in step so the tab stays shareable / bookmarkable. The
-      // tab itself is driven by local state above, so this is best-effort
-      // and never blocks the switch.
-      const params = new URLSearchParams(location.search);
-      if (tab === 'preferences') params.set('tab', 'preferences');
-      else params.delete('tab');
-      const qs = params.toString();
-      navigate(
-        { pathname: location.pathname, search: qs ? `?${qs}` : '' },
-        { replace: true },
-      );
-    },
-    [navigate, location.pathname, location.search],
-  );
 
   /* The backend's `is_read` query param is tri-state: `undefined` =
      don't filter, `true` = only read, `false` = only unread. */
@@ -185,7 +152,6 @@ export function NotificationsPage() {
     },
     staleTime: 10_000,
     refetchOnWindowFocus: true,
-    enabled: activeTab === 'inbox',
   });
 
   const items: Notification[] = useMemo(() => data?.items ?? [], [data]);
@@ -247,7 +213,7 @@ export function NotificationsPage() {
         })}
         actions={
           <>
-            {activeTab === 'inbox' && unreadCount > 0 && (
+            {unreadCount > 0 && (
               <Button
                 variant="secondary"
                 size="sm"
@@ -290,45 +256,10 @@ export function NotificationsPage() {
       >
         {t('notifications.intro_body', {
           defaultValue:
-            'The inbox collects every alert the platform raises, imports finished, validation results, safety events, approvals and system messages, with filters for read and unread and a click that takes you straight to the source record. Use the Preferences tab to choose which event types reach you on which channel. Threshold alerts from BI Dashboards and outbound rules from Notification Webhooks both run through here.',
+            'The inbox collects every alert the platform raises, imports finished, validation results, safety events, approvals and system messages, with filters for read and unread and a click that takes you straight to the source record. Threshold alerts from BI Dashboards and outbound rules from Notification Webhooks both run through here.',
         })}
       </DismissibleInfo>
 
-      {/* Tab bar — Inbox vs Preferences.  The preferences tab houses the
-          per-event-type × per-channel routing matrix added in Wave 3 / T9. */}
-      <div className="border-b border-border-light flex items-center gap-1">
-        <button
-          type="button"
-          onClick={() => selectTab('inbox')}
-          className={clsx(
-            'px-3 py-1.5 text-sm font-medium border-b-2 -mb-px transition-colors',
-            activeTab === 'inbox'
-              ? 'border-oe-blue text-oe-blue'
-              : 'border-transparent text-content-secondary hover:text-content-primary',
-          )}
-          aria-current={activeTab === 'inbox' ? 'page' : undefined}
-        >
-          {t('notifications.tab_inbox', { defaultValue: 'Inbox' })}
-        </button>
-        <button
-          type="button"
-          onClick={() => selectTab('preferences')}
-          className={clsx(
-            'px-3 py-1.5 text-sm font-medium border-b-2 -mb-px transition-colors',
-            activeTab === 'preferences'
-              ? 'border-oe-blue text-oe-blue'
-              : 'border-transparent text-content-secondary hover:text-content-primary',
-          )}
-          aria-current={activeTab === 'preferences' ? 'page' : undefined}
-        >
-          {t('notifications.tab_preferences', { defaultValue: 'Preferences' })}
-        </button>
-      </div>
-
-      {activeTab === 'preferences' ? (
-        <PreferencesTab />
-      ) : (
-      <>
       {/* Inbox toolbar — count chips (left) + filter dropdown (right). The
           Mark-all-read action now lives in the PageHeader, and the module
           title + icon live in the global top bar, so the page-level chrome
@@ -527,8 +458,6 @@ export function NotificationsPage() {
             </button>
           </div>
         </div>
-      )}
-      </>
       )}
     </div>
   );
