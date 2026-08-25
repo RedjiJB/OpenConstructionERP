@@ -394,11 +394,6 @@ const FIXED_ALLOWED: ReadonlyArray<{ file: string; snippet: string; why: string 
   },
   {
     file: 'features/procurement/ProcurementPage.tsx',
-    snippet: 'amount_subtotal: String(poSubtotal.toFixed(2)),',
-    why: 'Body of the purchase order POST, read by the server rather than by a person.',
-  },
-  {
-    file: 'features/procurement/ProcurementPage.tsx',
     snippet: 'amount_total: String(poTotal.toFixed(2)),',
     why: 'Body of the purchase order POST, read by the server rather than by a person.',
   },
@@ -647,7 +642,7 @@ describe('every number and date is written in the language the reader picked', (
   });
 
   it('lists every argued toFixed exemption, so adding one shows up as a diff', () => {
-    // Sixteen entries covering eighteen sites in ten files, against 139
+    // Fifteen entries covering seventeen sites in ten files, against 139
     // exempted by a rule.
     // The ratio is the point: rules carry the categories that repeat, and
     // anything left over has to be argued in a sentence someone can disagree
@@ -655,7 +650,6 @@ describe('every number and date is written in the language the reader picked', (
     expect(FIXED_ALLOWED.map((a) => `${a.file} :: ${a.snippet}`)).toEqual([
       'features/finance/FinancePage.tsx :: unit_rate: lineAmount.toFixed(2),',
       'features/finance/FinancePage.tsx :: amount: lineAmount.toFixed(2),',
-      'features/procurement/ProcurementPage.tsx :: amount_subtotal: String(poSubtotal.toFixed(2)),',
       'features/procurement/ProcurementPage.tsx :: amount_total: String(poTotal.toFixed(2)),',
       'features/procurement/ProcurementPage.tsx :: updated.amount = (qty * rate).toFixed(2);',
       'features/property-dev/PropertyDevPage.tsx :: amount: String(outstanding.toFixed(2)),',
