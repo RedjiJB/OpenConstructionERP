@@ -41,14 +41,14 @@ export function DashboardMapWeather() {
   if (sites.length === 0 && locations.length === 0) return null;
 
   return (
-    <div className="rounded-xl border border-border-light bg-surface-primary/70 p-3.5 animate-card-in">
-      <div className="mb-2.5 flex items-center gap-2">
+    <div className="rounded-xl border border-border-light bg-surface-primary/70 p-5 animate-card-in">
+      <div className="mb-4 flex items-center gap-2">
         <MapPin size={16} className="text-oe-blue" />
         <h3 className="text-sm font-semibold text-content-primary">
           {t('dashboard.map_section_title', { defaultValue: 'Locations & weather' })}
         </h3>
       </div>
-      <div className="grid grid-cols-1 gap-3 lg:h-[19rem] lg:grid-cols-[1.5fr_1fr]">
+      <div className="grid grid-cols-1 gap-4 lg:h-[22rem] lg:grid-cols-[1.5fr_1fr]">
         <DashboardSitesMap className="lg:h-full" markers={markers} />
         <DashboardSitesPanel sites={sites} />
       </div>

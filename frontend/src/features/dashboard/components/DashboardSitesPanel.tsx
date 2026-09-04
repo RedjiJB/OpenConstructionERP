@@ -24,13 +24,13 @@ export function DashboardSitesPanel({ sites }: DashboardSitesPanelProps) {
 
   return (
     <div className="flex h-full flex-col overflow-hidden rounded-xl border border-border-light bg-surface-elevated/90">
-      <div className="flex items-center justify-between border-b border-border-light px-3 py-2">
+      <div className="flex items-center justify-between border-b border-border-light px-4 py-3">
         <span className="text-xs font-semibold text-content-primary">
           {t('dashboard.sites_title', { defaultValue: 'Sites & weather' })}
         </span>
         <span className="text-[10px] tabular-nums text-content-tertiary">{sites.length}</span>
       </div>
-      <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-2 overflow-hidden p-2">
+      <div className="grid flex-1 auto-rows-fr grid-cols-2 gap-3 overflow-hidden p-3">
         {shown.map((site) => {
           const hasCoords = Number.isFinite(site.lat) && Number.isFinite(site.lng);
           return (
@@ -38,7 +38,7 @@ export function DashboardSitesPanel({ sites }: DashboardSitesPanelProps) {
               key={site.id}
               type="button"
               onClick={() => navigate('/map')}
-              className="group flex min-w-0 flex-col justify-center gap-1 rounded-lg border border-border-light bg-surface-primary/50 px-2.5 py-2 text-left transition-colors hover:border-oe-blue/40 hover:bg-surface-primary"
+              className="group flex min-w-0 flex-col justify-center gap-2 rounded-lg border border-border-light bg-surface-primary/50 px-3 py-2.5 text-left transition-colors hover:border-oe-blue/40 hover:bg-surface-primary"
             >
               <span className="flex items-center gap-1.5">
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-oe-blue">
