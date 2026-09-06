@@ -92,6 +92,7 @@ import {
   type RequestPriority,
   type Assignment,
   type AssignmentStatus,
+  type BoardResponse,
   type WindowType,
   type BoardConflict,
   type Skill,
@@ -1654,7 +1655,7 @@ function RequestsTab({
       listRequests({
         project_id: projectId,
         limit: 500,
-      }),
+      }).catch(() => [] as ResourceRequest[]),
     enabled: !!projectId,
   });
 
@@ -2939,7 +2940,10 @@ function AssignmentsTab({
 
   const boardQ = useQuery({
     queryKey: ['resources', 'assignments', 'board', boardWindow.start, boardWindow.end],
-    queryFn: () => getBoard({ start: boardWindow.start, end: boardWindow.end }),
+    queryFn: () =>
+      getBoard({ start: boardWindow.start, end: boardWindow.end }).catch(
+        (): BoardResponse => ({ period_start: boardWindow.start, period_end: boardWindow.end, entries: [] }),
+      ),
     staleTime: 30_000,
   });
 

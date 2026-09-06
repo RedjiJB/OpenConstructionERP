@@ -230,10 +230,15 @@ export function ProjectWeather({
     const monthMin = avg(month, (d) => d.tMin);
     // Pick the most frequent weather bucket to colour the lead icon
     const WeekIcon = iconFor(week[0]?.weatherCode ?? 0);
+    // Two stats stacked on their own line each, not forced onto one row --
+    // a narrow container (e.g. the dashboard's site-card grid, ~150px wide)
+    // clipped this when it was a single unbroken flex row with no wrap.
+    // Each row still reads as a single glanceable chip; there just isn't a
+    // hard requirement that both fit side by side.
     return (
       <div
         className={clsx(
-          'flex items-center gap-2 text-[10px] text-content-tertiary',
+          'flex min-w-0 flex-col gap-0.5 text-[10px] text-content-tertiary',
           className,
         )}
         title={t('weather.card_summary_hint', {
@@ -241,23 +246,22 @@ export function ProjectWeather({
             'Rough forecast for this location - next 7 days and ~15 days avg',
         })}
       >
-        <WeekIcon size={12} className="text-oe-blue shrink-0" />
-        <span className="flex items-center gap-0.5">
-          <span className="font-semibold text-content-primary">7d</span>
-          <span className="tabular-nums">
+        <span className="flex min-w-0 items-center gap-1">
+          <WeekIcon size={12} className="text-oe-blue shrink-0" />
+          <span className="font-semibold text-content-primary shrink-0">7d</span>
+          <span className="tabular-nums shrink-0">
             {Math.round(weekMin)}°/{Math.round(weekMax)}°
           </span>
           {weekRain > 0.5 && (
-            <span className="flex items-center gap-0.5 text-blue-500">
+            <span className="flex shrink-0 items-center gap-0.5 text-blue-500">
               <Droplets size={9} />
               {fmtFixed(weekRain, weekRain < 10 ? 1 : 0)}mm
             </span>
           )}
         </span>
-        <span className="text-content-quaternary">·</span>
-        <span className="flex items-center gap-0.5">
-          <span className="font-semibold text-content-primary">~1mo</span>
-          <span className="tabular-nums">
+        <span className="flex min-w-0 items-center gap-1">
+          <span className="font-semibold text-content-primary shrink-0">~1mo</span>
+          <span className="tabular-nums shrink-0">
             {Math.round(monthMin)}°/{Math.round(monthMax)}°
           </span>
         </span>
