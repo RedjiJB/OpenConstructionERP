@@ -82,6 +82,14 @@ export function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  // Two-factor step: the backend's login route returns 401 with
+  // requires_totp: true (not a hard failure) once email+password are
+  // correct but the account has TOTP enabled. Keeping this as separate
+  // state from `error` lets the second submit reuse the same email/
+  // password already entered rather than forcing a full re-login.
+  const [requiresTotp, setRequiresTotp] = useState(false);
+  const [totpCode, setTotpCode] = useState('');
+  const totpInputRef = useRef<HTMLInputElement>(null);
   const [rememberMe, setRememberMe] = useState(
     () => localStorage.getItem('oe_remember') === '1',
   );
@@ -183,10 +191,21 @@ export function LoginPage() {
       const res = await fetch('/api/v1/users/auth/login/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
+        body: JSON.stringify(requiresTotp ? { email, password, totp_code: totpCode } : { email, password }),
       });
       if (!res.ok) {
         const data = await res.json().catch(() => null);
+        if (data && (data as { requires_totp?: boolean }).requires_totp) {
+          setRequiresTotp(true);
+          // A wrong/missing code both come back with requires_totp: true --
+          // only show it as an error once a code was actually attempted
+          // (the very first response after a correct password shouldn't
+          // read as "you got something wrong").
+          setError(requiresTotp ? t('auth.totp_incorrect', 'Incorrect code') : '');
+          setTotpCode('');
+          setTimeout(() => totpInputRef.current?.focus(), 0);
+          return;
+        }
         const parsed = extractErrorMessageFromBody(data);
         setError(parsed || t('auth.invalid_credentials', 'Invalid email or password'));
         return;
@@ -666,6 +685,33 @@ export function LoginPage() {
                 </div>
               </div>
 
+              {requiresTotp && (
+                <div className="flex flex-col gap-1 animate-stagger-in">
+                  <label htmlFor="login-totp" className="text-sm font-medium text-content-primary">
+                    {t('auth.totp_code', 'Authenticator code')}
+                  </label>
+                  <input
+                    ref={totpInputRef}
+                    id="login-totp"
+                    name="totp_code"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]{6}"
+                    maxLength={6}
+                    value={totpCode}
+                    onChange={(e) => setTotpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    placeholder={t('auth.totp_placeholder', '6-digit code') ?? ''}
+                    autoComplete="one-time-code"
+                    required
+                    aria-required="true"
+                    className="h-9 w-full rounded-lg border border-border bg-surface-primary px-3 text-sm tracking-[0.2em] text-content-primary placeholder:tracking-normal placeholder:text-content-tertiary transition-all duration-fast ease-oe focus:outline-none focus:ring-2 focus:ring-oe-blue focus:border-transparent hover:border-content-tertiary"
+                  />
+                  <p className="text-2xs text-content-tertiary">
+                    {t('auth.totp_hint', 'Enter the code from your authenticator app.')}
+                  </p>
+                </div>
+              )}
+
               <div className="animate-stagger-in" style={{ animationDelay: '380ms' }}>
                 <label className="flex items-center gap-2 cursor-pointer select-none">
                   <input type="checkbox" checked={rememberMe} onChange={(e) => setRememberMe(e.target.checked)} className="h-3.5 w-3.5 rounded border-border text-oe-blue focus:ring-oe-blue accent-oe-blue" />
@@ -680,7 +726,9 @@ export function LoginPage() {
               )}
 
               <div className="animate-stagger-in" style={{ animationDelay: '400ms' }}>
-                <Button type="submit" variant="primary" size="lg" loading={loading} className="w-full btn-shimmer">{t('auth.login', 'Sign in')}</Button>
+                <Button type="submit" variant="primary" size="lg" loading={loading} className="w-full btn-shimmer">
+                  {requiresTotp ? t('auth.verify', 'Verify') : t('auth.login', 'Sign in')}
+                </Button>
               </div>
             </form>
 
