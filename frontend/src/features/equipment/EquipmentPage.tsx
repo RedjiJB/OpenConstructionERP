@@ -550,7 +550,7 @@ function AssetTable({
   const { t } = useTranslation();
   return (
     <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+      <table className="responsive-table w-full text-sm">
         <thead className="bg-surface-secondary text-content-tertiary text-xs uppercase tracking-wide">
           <tr>
             <th className="px-4 py-2.5 text-left">
@@ -580,10 +580,10 @@ function AssetTable({
               onClick={() => onSelect(r.id)}
               className="border-t border-border-light hover:bg-surface-secondary cursor-pointer"
             >
-              <td className="px-4 py-2 font-mono text-xs text-content-secondary">
+              <td className="px-4 py-2 font-mono text-xs text-content-secondary" data-label={t('equipment.col_code', { defaultValue: 'Code' })}>
                 {r.code}
               </td>
-              <td className="px-4 py-2">
+              <td className="px-4 py-2" data-label={t('equipment.col_name', { defaultValue: 'Name' })}>
                 <div className="font-medium text-content-primary truncate max-w-[280px]">
                   {r.name}
                 </div>
@@ -593,15 +593,15 @@ function AssetTable({
                   </div>
                 )}
               </td>
-              <td className="px-4 py-2 text-content-secondary text-xs">
+              <td className="px-4 py-2 text-content-secondary text-xs" data-label={t('equipment.col_type', { defaultValue: 'Type' })}>
                 {r.type_code}
               </td>
-              <td className="px-4 py-2">
+              <td className="px-4 py-2" data-label={t('equipment.col_status', { defaultValue: 'Status' })}>
                 <Badge variant={STATUS_VARIANT[r.status]} dot>
                   {r.status}
                 </Badge>
               </td>
-              <td className="px-4 py-2 text-xs text-content-secondary max-w-[220px]">
+              <td className="px-4 py-2 text-xs text-content-secondary max-w-[220px]" data-label={t('equipment.col_location', { defaultValue: 'Location' })}>
                 {r.location_lat !== null &&
                 r.location_lng !== null &&
                 r.location_lat !== undefined &&
@@ -624,7 +624,7 @@ function AssetTable({
                   '—'
                 )}
               </td>
-              <td className="px-4 py-2 text-right text-xs tabular-nums">
+              <td className="px-4 py-2 text-right text-xs tabular-nums" data-label={t('equipment.col_hours', { defaultValue: 'Hours' })}>
                 {fmtFixed(toNum(r.hour_meter), 0)} h
               </td>
             </tr>

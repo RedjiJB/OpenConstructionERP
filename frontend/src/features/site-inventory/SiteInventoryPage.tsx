@@ -1028,7 +1028,7 @@ function StockPanel({
         ))}
       </div>
       <Card padding="none" className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="responsive-table w-full text-sm">
           <thead>
             <tr className="border-b border-border-light bg-surface-secondary/30 text-2xs uppercase tracking-wider text-content-tertiary">
               <th className={thCls}>{t('site_inventory.col_item', { defaultValue: 'Item' })}</th>
@@ -1050,18 +1050,19 @@ function StockPanel({
                   key={row.item_id}
                   className="border-b border-border-light last:border-0 hover:bg-surface-secondary/40"
                 >
-                  <td className={clsx(tdCls, 'font-medium')}>{row.name}</td>
-                  <td className={clsx(tdCls, 'text-content-tertiary')}>{row.unit || '-'}</td>
+                  <td className={clsx(tdCls, 'font-medium')} data-label={t('site_inventory.col_item', { defaultValue: 'Item' })}>{row.name}</td>
+                  <td className={clsx(tdCls, 'text-content-tertiary')} data-label={t('site_inventory.col_unit', { defaultValue: 'Unit' })}>{row.unit || '-'}</td>
                   <td
                     className={clsx(
                       tdCls,
                       'text-right tabular-nums font-semibold',
                       st === 'negative' && 'text-semantic-error',
                     )}
+                    data-label={t('site_inventory.col_on_hand', { defaultValue: 'On hand' })}
                   >
                     {row.on_hand}
                   </td>
-                  <td className={clsx(tdCls, 'text-center')}>
+                  <td className={clsx(tdCls, 'text-center')} data-label={t('site_inventory.col_status', { defaultValue: 'Status' })}>
                     <Badge variant={badge.variant} size="sm" dot>
                       {t(badge.key, { defaultValue: badge.def })}
                     </Badge>

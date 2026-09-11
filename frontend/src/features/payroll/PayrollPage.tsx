@@ -987,7 +987,7 @@ export default function PayrollPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="responsive-table w-full text-sm">
                 <thead>
                   <tr className="border-b border-border-subtle text-left text-xs uppercase tracking-wide text-content-tertiary">
                     <th className="px-4 py-2">{t('payroll.col.worker', { defaultValue: 'Worker' })}</th>
@@ -1012,7 +1012,7 @@ export default function PayrollPage() {
                     return (
                       <Fragment key={e.id}>
                         <tr className="border-b border-border-subtle/60">
-                          <td className="px-4 py-2 text-content-primary">
+                          <td className="px-4 py-2 text-content-primary" data-label={t('payroll.col.worker', { defaultValue: 'Worker' })}>
                             {e.resource_id ? (
                               <Link
                                 to={`/resources?resourceId=${encodeURIComponent(e.resource_id)}`}
@@ -1028,16 +1028,16 @@ export default function PayrollPage() {
                               e.worker
                             )}
                           </td>
-                          <td className="px-4 py-2 text-content-secondary">
+                          <td className="px-4 py-2 text-content-secondary" data-label={t('payroll.col.date', { defaultValue: 'Date' })}>
                             {e.work_date ? <DateDisplay value={e.work_date} format="date" /> : '-'}
                           </td>
-                          <td className="px-4 py-2 text-right tabular-nums">{hours(e.hours)}</td>
-                          <td className="px-4 py-2 text-right tabular-nums">{money(e.rate, ccy)}</td>
-                          <td className="px-4 py-2 text-right tabular-nums">{money(e.amount, ccy)}</td>
-                          <td className="px-4 py-2 text-right tabular-nums text-content-secondary">
+                          <td className="px-4 py-2 text-right tabular-nums" data-label={t('payroll.col.hours', { defaultValue: 'Hours' })}>{hours(e.hours)}</td>
+                          <td className="px-4 py-2 text-right tabular-nums" data-label={t('payroll.col.rate', { defaultValue: 'Rate' })}>{money(e.rate, ccy)}</td>
+                          <td className="px-4 py-2 text-right tabular-nums" data-label={t('payroll.col.amount', { defaultValue: 'Gross' })}>{money(e.amount, ccy)}</td>
+                          <td className="px-4 py-2 text-right tabular-nums text-content-secondary" data-label={t('payroll.col.deductions', { defaultValue: 'Deductions' })}>
                             {dedTotal > 0 ? `-${money(dedTotal, ccy)}` : '-'}
                           </td>
-                          <td className="px-4 py-2 text-right font-medium tabular-nums text-content-primary">
+                          <td className="px-4 py-2 text-right font-medium tabular-nums text-content-primary" data-label={t('payroll.col.net', { defaultValue: 'Net' })}>
                             {money(e.net_amount, ccy)}
                           </td>
                           <td className="px-2 py-2 text-right">

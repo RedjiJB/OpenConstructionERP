@@ -1368,7 +1368,7 @@ function ResourceTable({
         </span>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full text-sm" data-testid="resources-table">
+        <table className="responsive-table w-full text-sm" data-testid="resources-table">
           <thead className="bg-surface-secondary text-content-tertiary text-xs">
             <tr>
               <th className="px-3 py-2.5 text-left w-8" scope="col">
@@ -1460,18 +1460,18 @@ function ResourceTable({
                       data-testid={`resource-select-${r.id}`}
                     />
                   </td>
-                  <td className="px-4 py-2 font-mono text-xs tabular-nums text-content-secondary">
+                  <td className="px-4 py-2 font-mono text-xs tabular-nums text-content-secondary" data-label={t('resources.col_code', { defaultValue: 'Code' })}>
                     {r.code}
                   </td>
-                  <td className="px-4 py-2 font-medium text-content-primary">
+                  <td className="px-4 py-2 font-medium text-content-primary" data-label={t('resources.col_name', { defaultValue: 'Name' })}>
                     {r.name}
                   </td>
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-2" data-label={t('resources.col_type', { defaultValue: 'Type' })}>
                     <Badge variant={TYPE_VARIANT[r.resource_type]} size="sm">
                       {resourceTypeLabel(t, r.resource_type)}
                     </Badge>
                   </td>
-                  <td className="px-4 py-2">
+                  <td className="px-4 py-2" data-label={t('resources.col_status', { defaultValue: 'Status' })}>
                     <Badge
                       variant={
                         r.status === 'active'
@@ -1486,14 +1486,14 @@ function ResourceTable({
                       {resourceStatusLabel(t, r.status)}
                     </Badge>
                   </td>
-                  <td className="px-4 py-2 text-right">
+                  <td className="px-4 py-2 text-right" data-label={t('resources.col_rate', { defaultValue: 'Rate' })}>
                     <InlineRateCell
                       resource={r}
                       pending={pendingRateId === r.id}
                       onSave={onInlineRateSave}
                     />
                   </td>
-                  <td className="px-4 py-2 text-right">
+                  <td className="px-4 py-2 text-right" data-label={t('resources.actions', { defaultValue: 'Actions' })}>
                     <div className="inline-flex gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
                       <button
                         type="button"

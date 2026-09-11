@@ -1711,3 +1711,69 @@ html.oe-nav-pending body {
     display: none;
   }
 }
+
+/* ── Responsive tables (D-Central FieldOps fork) ──────────────────────────
+   Backlog fix: every facade-backed list page (Equipment, Resources,
+   Procurement, Payroll, Site Inventory, Field Time, Notifications, Vendors)
+   hand-rolls its own <table> in an overflow-x-auto wrapper -- confirmed
+   live at 375px that this forces a horizontal-scroll gesture inside the
+   table to reach the STATUS/action columns, since the page itself never
+   overflows the viewport. No shared DataTable component existed to fix
+   this in one place, so each page needed its own pass -- this is that
+   shared piece: a CSS-only technique (no JS, no new dependency, same
+   preference this project already applies elsewhere) that collapses a
+   table to a stacked card list below the `sm` breakpoint, using each
+   cell's own `data-label` attribute as its visible field name.
+
+   Usage: add class="responsive-table" to the <table> element itself (the
+   surrounding overflow-x-auto wrapper can stay -- it simply has nothing
+   to scroll below `sm` once the table stops being a table), and a
+   data-label="Column Name" attribute on every <td> whose column has a
+   visible header. A td with no data-label (e.g. a leading checkbox/icon
+   column) still stacks correctly, just without a label -- fine for a
+   purely visual/action cell. */
+@media (max-width: 639px) {
+  table.responsive-table,
+  table.responsive-table thead,
+  table.responsive-table tbody,
+  table.responsive-table th,
+  table.responsive-table td,
+  table.responsive-table tr {
+    display: block;
+    width: 100%;
+  }
+  table.responsive-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+  table.responsive-table tbody tr {
+    @apply mb-3 rounded-lg border border-border-light bg-surface-primary p-2;
+  }
+  table.responsive-table tbody tr:last-child {
+    margin-bottom: 0;
+  }
+  table.responsive-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border: none !important;
+    padding: 0.375rem 0.5rem !important;
+    text-align: right;
+  }
+  table.responsive-table td[data-label]::before {
+    content: attr(data-label);
+    @apply text-2xs font-semibold uppercase tracking-wide text-content-tertiary;
+    text-align: left;
+    flex-shrink: 0;
+  }
+  /* A td with no data-label (icon/checkbox columns) sits flush left
+     instead of pushed right by the (absent) label. */
+  table.responsive-table td:not([data-label]) {
+    justify-content: flex-start;
+  }
+}

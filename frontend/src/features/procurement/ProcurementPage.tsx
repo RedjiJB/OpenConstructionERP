@@ -774,7 +774,7 @@ function PurchaseOrdersTab({
 
       {/* Table */}
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="responsive-table w-full text-sm">
           <thead>
             <tr className="border-b border-border-light bg-surface-secondary/50">
               <th className="px-4 py-3 text-left font-medium text-content-tertiary">
@@ -812,16 +812,16 @@ function PurchaseOrdersTab({
                 key={po.id}
                 className="border-b border-border-light hover:bg-surface-secondary/30 transition-colors"
               >
-                <td className="px-4 py-3 font-mono text-xs text-content-primary">
+                <td className="px-4 py-3 font-mono text-xs text-content-primary" data-label={t('procurement.po_number', { defaultValue: 'PO #' })}>
                   {po.po_number}
                 </td>
-                <td className="px-4 py-3 text-content-secondary">
+                <td className="px-4 py-3 text-content-secondary" data-label={t('procurement.vendor', { defaultValue: 'Vendor' })}>
                   {po.vendor_name}
                 </td>
-                <td className="px-4 py-3 text-content-secondary">
+                <td className="px-4 py-3 text-content-secondary" data-label={t('procurement.issue_date', { defaultValue: 'Date' })}>
                   <DateDisplay value={po.issue_date} />
                 </td>
-                <td className="px-4 py-3 text-content-secondary">
+                <td className="px-4 py-3 text-content-secondary" data-label={t('procurement.delivery_date', { defaultValue: 'Delivery' })}>
                   <div className="flex flex-col items-start gap-1">
                     <DateDisplay value={po.delivery_date} />
                     <DeliveryCountdownBadge
@@ -830,7 +830,7 @@ function PurchaseOrdersTab({
                     />
                   </div>
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="px-4 py-3 text-right" data-label={t('procurement.amount', { defaultValue: 'Amount' })}>
                   {/* Money bug fix: feed MoneyDisplay the REAL wire fields
                       `amount_total` (Decimal string) + `currency_code`. The
                       old `po.total_amount`/`po.currency` did not exist on the
@@ -839,7 +839,7 @@ function PurchaseOrdersTab({
                       Number() wrapping is needed here. */}
                   <MoneyDisplay amount={po.amount_total} currency={po.currency_code} />
                 </td>
-                <td className="px-4 py-3 text-center">
+                <td className="px-4 py-3 text-center" data-label={t('common.status', { defaultValue: 'Status' })}>
                   <div className="flex flex-col items-center gap-1">
                     <Badge
                       variant={PO_STATUS_COLORS[po.status] ?? 'neutral'}
@@ -857,7 +857,7 @@ function PurchaseOrdersTab({
                     <POStatusPipeline status={po.status} />
                   </div>
                 </td>
-                <td className="px-4 py-3 text-right">
+                <td className="px-4 py-3 text-right" data-label={t('common.actions', { defaultValue: 'Actions' })}>
                   {isManager && po.status === 'draft' && (
                   <div className="flex items-center justify-end gap-1 flex-wrap">
                     {/* Issue is the only real workflow action this backend
