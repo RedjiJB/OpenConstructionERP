@@ -48,7 +48,12 @@ export function DashboardMapWeather() {
           {t('dashboard.map_section_title', { defaultValue: 'Locations & weather' })}
         </h3>
       </div>
-      <div className="grid grid-cols-1 gap-4 lg:h-[22rem] lg:grid-cols-[1.2fr_1fr]">
+      {/* Fixed panel width, map fills the rest -- this widget now sits on
+          its own full-width row (see HomePage.tsx), so a fraction-based
+          split would stretch the weather panel absurdly wide on a large
+          screen. A fixed 380px keeps it a comfortable, consistent size
+          regardless of how much total width the widget has. */}
+      <div className="grid grid-cols-1 gap-4 lg:h-[22rem] lg:grid-cols-[1fr_380px]">
         <DashboardSitesMap className="lg:h-full" markers={markers} />
         <DashboardSitesPanel sites={sites} />
       </div>

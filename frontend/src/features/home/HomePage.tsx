@@ -49,7 +49,7 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   return (
-    <div className="mx-auto max-w-5xl p-6 sm:p-8">
+    <div className="mx-auto max-w-[1600px] p-6 sm:p-8">
       <div className="mb-8 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-content-primary">
@@ -71,19 +71,24 @@ export default function HomePage() {
 
       <SiteCardsSection />
 
-      <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-[2fr_1fr]">
+      {/* Map widget on its own full-width row -- it was previously sharing
+          a row with System Status/Inbox in a 2fr/1fr split, which left it
+          too narrow once real site counts pushed the weather panel wider,
+          causing internal horizontal overflow. */}
+      <div className="mb-6">
         <DashboardMapWeather />
-        <div className="flex flex-col gap-4">
-          <SystemStatusCard />
-          <InboxCard />
-        </div>
+      </div>
+
+      <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <SystemStatusCard />
+        <InboxCard />
       </div>
 
       <div className="mb-6">
         <RecentActivityCard />
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {MODULES.map(({ to, icon: Icon, title, description }) => (
           <Link
             key={to}
