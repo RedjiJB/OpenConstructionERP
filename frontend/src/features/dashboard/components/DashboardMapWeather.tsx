@@ -48,7 +48,7 @@ export function DashboardMapWeather() {
           {t('dashboard.map_section_title', { defaultValue: 'Locations & weather' })}
         </h3>
       </div>
-      <div className="grid grid-cols-1 gap-4 lg:h-[22rem] lg:grid-cols-[1.5fr_1fr]">
+      <div className="grid grid-cols-1 gap-4 lg:h-[22rem] lg:grid-cols-[1.2fr_1fr]">
         <DashboardSitesMap className="lg:h-full" markers={markers} />
         <DashboardSitesPanel sites={sites} />
       </div>

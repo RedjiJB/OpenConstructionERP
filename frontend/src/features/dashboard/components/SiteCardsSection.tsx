@@ -24,7 +24,7 @@ export function SiteCardsSection() {
       <h2 className="mb-3 text-sm font-semibold text-content-primary">
         {t('dashboard.sites_section_title', { defaultValue: 'Sites' })}
       </h2>
-      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:[grid-template-columns:repeat(auto-fill,minmax(260px,1fr))]">
         {sites.map((site) => (
           <SiteCard key={site.id} site={site} />
         ))}

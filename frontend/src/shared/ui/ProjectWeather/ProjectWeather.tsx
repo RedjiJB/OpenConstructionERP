@@ -238,7 +238,7 @@ export function ProjectWeather({
     return (
       <div
         className={clsx(
-          'flex min-w-0 flex-col gap-0.5 text-[10px] text-content-tertiary',
+          'flex min-w-0 flex-col gap-1 text-[10px] leading-normal text-content-tertiary',
           className,
         )}
         title={t('weather.card_summary_hint', {

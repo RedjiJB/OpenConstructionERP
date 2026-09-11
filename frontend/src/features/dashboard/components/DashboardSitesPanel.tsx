@@ -44,7 +44,7 @@ export function DashboardSitesPanel({ sites }: DashboardSitesPanelProps) {
                 <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-oe-blue/10 text-oe-blue">
                   <MapPin size={11} />
                 </span>
-                <span className="truncate text-xs font-semibold text-content-primary">{site.name}</span>
+                <span className="truncate text-xs font-semibold text-content-primary" title={site.name}>{site.name}</span>
               </span>
               {hasCoords ? (
                 <ProjectWeather
