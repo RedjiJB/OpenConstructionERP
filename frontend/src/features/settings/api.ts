@@ -7,10 +7,28 @@ export interface Profile {
   role: string;
   email: string;
   full_name: string;
+  totp_enabled: boolean;
 }
 
 export function getProfile(): Promise<Profile> {
   return apiGet<Profile>('/v1/users/me/');
+}
+
+export interface TotpEnrollment {
+  secret: string;
+  provisioning_uri: string;
+}
+
+export function startTotpEnrollment(): Promise<TotpEnrollment> {
+  return apiPost<TotpEnrollment>('/v1/users/me/totp/enroll', {});
+}
+
+export function confirmTotpEnrollment(code: string): Promise<{ ok: boolean }> {
+  return apiPost<{ ok: boolean }>('/v1/users/me/totp/confirm', { code });
+}
+
+export function disableTotp(): Promise<{ ok: boolean }> {
+  return apiPost<{ ok: boolean }>('/v1/users/me/totp/disable', {});
 }
 
 export interface LlmSettingsStatus {
