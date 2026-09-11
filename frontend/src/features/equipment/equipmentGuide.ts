@@ -31,7 +31,7 @@ export const equipmentGuide: ModuleGuideContent = {
       titleDefault: 'Utilisation and telemetry',
       bodyKey: 'guide.equipment.utilization.body',
       bodyDefault:
-        'Open an asset to see its hour meter, odometer and telemetry history. Log meter reading records a new reading with hour-meter, odometer, fuel level and engine status, so utilisation stays current.',
+        'Open an asset to see its hour meter and location, drawn from real telemetry readings the fleet already reports -- there is no manual reading-entry step to keep this current.',
     },
     {
       icon: 'Layers',
